@@ -20,7 +20,7 @@ services:
     runtime: docker
     region: virginia
     plan: free
-    healthCheckPath: /
+    healthCheckPath: /health
     autoDeploy: true
     envVars:
       - key: DATABASE_URL

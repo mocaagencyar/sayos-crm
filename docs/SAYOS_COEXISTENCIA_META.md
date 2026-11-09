@@ -49,10 +49,17 @@ el equipo contesta desde el teléfono, y permite contestar a mano desde el dashb
 
    `META_VERIFY_TOKEN` se genera solo. La marca (`BRAND_*`), `BOT_ENABLED=false`
    y `WHATSAPP_PROVIDER=meta` ya vienen cargados.
-3. Esperá el deploy y abrí `https://sayos-crm.onrender.com/` → tiene que decir
+3. Esperá el deploy y abrí `https://sayos-crm.onrender.com/health` → tiene que decir
    `"negocio": "Sayos"` y `"persistencia": "PostgreSQL"`.
-4. Entrá a `/login` → **Acciones → Cargar datos demo**: aparecen 7 leads de prueba
+4. Entrá a `https://sayos-crm.onrender.com` (te lleva al login) → **Acciones → Cargar datos demo**: aparecen 7 leads de prueba
    ("Demo · …") en todas las etapas del pipeline. Se borran con *Eliminar*.
+
+### Acceso: URL propia y clave
+
+- La URL abre directo la pantalla de acceso (usuario + clave de `DASHBOARD_USERNAME` / `DASHBOARD_PASSWORD`). La sesión dura 12 h; *Acciones → Cerrar sesión* la termina.
+- 5 intentos fallidos desde la misma IP bloquean el acceso 15 minutos.
+- **Dominio propio (ej. `crm.sayos.com.ar`):** Render → servicio `sayos-crm` → *Settings → Custom Domains → Add* → `crm.sayos.com.ar`. Render indica un registro **CNAME** que hay que cargar en el DNS de `sayos.com.ar` (lo administra quien tenga el dominio; hoy lo tiene Claudio). El certificado HTTPS lo emite Render solo.
+- Con dominio propio, actualizar `PUBLIC_BASE_URL` y los dominios permitidos de la app de Meta (parte A.4) a `https://crm.sayos.com.ar`.
 
 > Plan gratis: el servicio se duerme tras 15 min sin uso (el primer mensaje lo
 > despierta en ~1 min) y la base gratis vence a los 30 días. Para Sayos en
@@ -83,6 +90,7 @@ Antes:
 | Desde otro teléfono, escribile a tu número | Aparece en **Conversaciones** con punto rojo de no leído (y aviso en Telegram si lo configuraste). **Nadie responde automáticamente.** |
 | Contestá desde tu WhatsApp Business | La respuesta aparece en el chat del CRM como **Comercial** |
 | Contestá desde el CRM (*Chat → Enviar como comercial*) | Llega al cliente y también se ve en tu teléfono. Solo funciona dentro de las 24 h desde el último mensaje del cliente (regla de Meta) |
+| Cerrar oportunidades | Botones **✓ Ganado** / **✕ Perdido** en cualquier etapa; **↺ Reabrir** si fue un error |
 | Pipeline | Arrastrar entre Nuevo → Contactado → Visita / medición → Presupuesto enviado → Seguimiento → Ganado/Perdido |
 | Datos / Seguimiento | Valor de la oportunidad, origen, nota interna, próxima acción |
 | Nuevo lead | Carga manual de una consulta que llegó por otro lado |

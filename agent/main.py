@@ -155,7 +155,11 @@ app = FastAPI(
     title="Max — Agente IA comercial",
     description="Agente comercial para calificación de leads y agendamiento de auditorías",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    # La URL es pública: no exponer /docs ni el esquema de la API
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
 )
 
 
@@ -173,8 +177,14 @@ async def logo_local():
 
 
 @app.get("/")
+async def inicio():
+    """La URL raíz abre el CRM (o el login si no hay sesión)."""
+    return RedirectResponse("/dashboard", status_code=303)
+
+
+@app.get("/health")
 async def health_check():
-    """Endpoint de salud para Railway y monitoreo."""
+    """Endpoint de salud para Render y monitoreo."""
     return {
         "status": "ok",
         "agente": "Max",
@@ -944,17 +954,43 @@ async def login_page():
     return HTMLResponse(_marca(html))
 
 
+# Bloqueo simple contra fuerza bruta: 5 intentos fallidos por IP → 15 minutos.
+_INTENTOS_LOGIN: dict[str, list[float]] = {}
+_MAX_INTENTOS, _VENTANA_BLOQUEO = 5, 15 * 60
+
+
+def _ip_cliente(request: Request) -> str:
+    reenviada = request.headers.get("x-forwarded-for", "")
+    return reenviada.split(",")[0].strip() or (request.client.host if request.client else "desconocida")
+
+
 @app.post("/login")
-async def login(usuario: str = Form(...), clave: str = Form(...)):
+async def login(request: Request, usuario: str = Form(...), clave: str = Form(...)):
+    ip = _ip_cliente(request)
+    ahora = time.time()
+    fallos = [t for t in _INTENTOS_LOGIN.get(ip, []) if ahora - t < _VENTANA_BLOQUEO]
+    if len(fallos) >= _MAX_INTENTOS:
+        return HTMLResponse("<p style='font-family:system-ui;padding:30px'>Demasiados intentos. Probá de nuevo en 15 minutos.</p>", status_code=429)
     esperado_usuario = os.getenv("DASHBOARD_USERNAME", "")
     esperado_clave = os.getenv("DASHBOARD_PASSWORD", "")
     if not esperado_usuario or not esperado_clave or not secrets.compare_digest(usuario, esperado_usuario) or not secrets.compare_digest(clave, esperado_clave):
+        _INTENTOS_LOGIN[ip] = fallos + [ahora]
+        logger.warning(f"Login fallido desde {ip}")
         return HTMLResponse("<p style='font-family:system-ui;padding:30px'>Usuario o contraseña incorrectos. <a href='/login'>Volver</a></p>", status_code=401)
+    _INTENTOS_LOGIN.pop(ip, None)
     timestamp = str(int(time.time()))
     response = RedirectResponse("/dashboard", status_code=303)
     # El navegador embebido puede no conservar cookies marcadas como Secure;
     # el transporte sigue protegido por HTTPS en Render.
     response.set_cookie(SESSION_COOKIE, timestamp + "." + _firma_sesion(timestamp), httponly=True, secure=False, samesite="lax", max_age=60 * 60 * 12)
+    return response
+
+
+@app.get("/logout")
+async def logout():
+    """Cierra la sesión del dashboard."""
+    response = RedirectResponse("/login", status_code=303)
+    response.delete_cookie(SESSION_COOKIE)
     return response
 
 
@@ -999,7 +1035,7 @@ function openOpportunity(t){var l=leads.find(function(x){return x.telefono===t})
 document.addEventListener('click',function(e){var b=e.target.closest('.edit-opportunity');if(b)openOpportunity(b.dataset.tel)});
 async function seedDemo(){var r=await fetch('/api/demo/seed',{method:'POST'});var d=await r.json();alert(d.mensaje+' ('+d.creados+' nuevos)');load()}
 async function loadInbox(){var d=await (await fetch('/conversaciones')).json(),leadsMap={};leads.forEach(function(l){leadsMap[l.telefono]=l});var box=document.getElementById('inbox-list');if(!box)return;box.innerHTML=(d.conversaciones||[]).map(function(c){var l=leadsMap[c.telefono],nombre=l?(l.nombre||'Sin nombre'):'Contacto nuevo',estado=l?(window.crmStages||[]).reduce(function(a,x){return x[0]===stage(l)?x[1]:a},stage(l)):'En conversación';return '<article class="card'+(l&&l.no_leido?' unread':'')+'"><div class="cardtop"><div><div class="name">'+(l&&l.no_leido?'<span class="unread-mark" title="No leído"></span>':'')+esc(nombre)+'</div><div class="phone">+'+esc(c.telefono.replace('@s.whatsapp.net','').replace('@c.us',''))+'</div></div><span class="pill">'+estado+'</span></div><div class="data"><div><strong>Mensajes:</strong> '+c.mensajes+'</div><div class="muted">Último contacto: '+new Date(c.ultimo_mensaje).toLocaleString('es-AR')+'</div></div><div class="actions"><button class="open-inbox-chat" data-tel="'+esc(c.telefono)+'">Ver conversación</button></div></article>'}).join('')||'<div class="empty">Todavía no hay conversaciones.</div>'}
-document.querySelector('.top').insertAdjacentHTML('beforeend','<div class="header-actions" style="position:relative;margin-right:8px"><button id="actions-menu-button" class="connect" style="width:auto;margin:0">Acciones ▾</button><div id="actions-menu" style="display:none;position:absolute;right:0;top:46px;min-width:210px;background:#111113;border:1px solid #3f3f46;border-radius:10px;padding:6px;box-shadow:0 16px 35px #0008;z-index:12"><button id="seed-demo-action" style="display:block;width:100%;text-align:left;background:none;border:0;color:#fff;padding:10px;border-radius:7px;cursor:pointer">Cargar datos demo</button><a href="/export/leads.csv" style="display:block;color:#fff;text-decoration:none;padding:10px;border-radius:7px">Exportar leads</a><a href="/export/conversaciones.csv" style="display:block;color:#fff;text-decoration:none;padding:10px;border-radius:7px">Exportar conversaciones</a></div></div>');document.getElementById('actions-menu-button').onclick=function(){var m=document.getElementById('actions-menu');m.style.display=m.style.display==='none'?'block':'none'};document.getElementById('seed-demo-action').onclick=function(){document.getElementById('actions-menu').style.display='none';seedDemo()};document.addEventListener('click',function(e){if(!e.target.closest('.header-actions'))document.getElementById('actions-menu').style.display='none'});
+document.querySelector('.top').insertAdjacentHTML('beforeend','<div class="header-actions" style="position:relative;margin-right:8px"><button id="actions-menu-button" class="connect" style="width:auto;margin:0">Acciones ▾</button><div id="actions-menu" style="display:none;position:absolute;right:0;top:46px;min-width:210px;background:#111113;border:1px solid #3f3f46;border-radius:10px;padding:6px;box-shadow:0 16px 35px #0008;z-index:12"><button id="seed-demo-action" style="display:block;width:100%;text-align:left;background:none;border:0;color:#fff;padding:10px;border-radius:7px;cursor:pointer">Cargar datos demo</button><a href="/export/leads.csv" style="display:block;color:#fff;text-decoration:none;padding:10px;border-radius:7px">Exportar leads</a><a href="/export/conversaciones.csv" style="display:block;color:#fff;text-decoration:none;padding:10px;border-radius:7px">Exportar conversaciones</a><a href="/logout" style="display:block;color:#fca5a5;text-decoration:none;padding:10px;border-radius:7px;border-top:1px solid #27272a;margin-top:4px">Cerrar sesión</a></div></div>');document.getElementById('actions-menu-button').onclick=function(){var m=document.getElementById('actions-menu');m.style.display=m.style.display==='none'?'block':'none'};document.getElementById('seed-demo-action').onclick=function(){document.getElementById('actions-menu').style.display='none';seedDemo()};document.addEventListener('click',function(e){if(!e.target.closest('.header-actions'))document.getElementById('actions-menu').style.display='none'});
 document.querySelector('.tabs').insertAdjacentHTML('beforeend','<button class="tab" data-tab="inbox">Bandeja</button>');document.querySelector('main').insertAdjacentHTML('beforeend','<section id="inbox" class="panel"><div id="inbox-list" class="pipeline" style="grid-template-columns:repeat(3,1fr)"></div><div class="note">Acá aparecen todos los contactos que hablaron con Max, incluso los que todavía no completaron la calificación.</div></section>');document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){document.querySelectorAll('.tab,.panel').forEach(function(x){x.classList.remove('active')});b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active');if(b.dataset.tab==='canales')loadChannels();if(b.dataset.tab==='inbox')loadInbox()}});load();setInterval(load,30000);
 </script></body></html>""")
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
@@ -1025,11 +1061,13 @@ document.querySelector('.tabs').insertAdjacentHTML('beforeend','<button class="t
       oldPipeline.insertAdjacentHTML('beforebegin','<h2 style="margin:24px 0 12px">Pipeline comercial</h2><div id="sales-pipeline" style="display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:12px;overflow-x:auto;padding-bottom:8px"></div>');
       var defaultStages=[['nuevo','Nuevo'],['contactado','Contactado'],['propuesta','Propuesta'],['negociacion','Negociación'],['ganado','Ganado'],['perdido','Perdido']];
       var normalize=function(l){if(l.cerrado)return 'ganado';if(l.descartado)return 'perdido';if(l.etapa==='seguimiento')return 'contactado';if(l.etapa==='cerrado')return 'ganado';if(l.etapa==='descartado')return 'perdido';return l.etapa||'contactado'};
-      function renderSales(){var box=document.getElementById('sales-pipeline');if(!box)return;var stages=window.crmStages||defaultStages;box.innerHTML=stages.map(function(s){return '<section class="stage" data-sales-stage="'+s[0]+'" style="min-height:300px"><h3>'+s[1]+' <span id="sales-count-'+s[0]+'">0</span></h3><div id="sales-col-'+s[0]+'"></div></section>'}).join('');stages.forEach(function(s){var key=s[0],items=leads.filter(function(l){return normalize(l)===key}),col=document.getElementById('sales-col-'+key);document.getElementById('sales-count-'+key).textContent=items.length;col.innerHTML=items.map(function(l){return '<article class="card sales-card'+(l.no_leido?' unread':'')+'" draggable="true" data-tel="'+esc(l.telefono)+'"><div class="cardtop"><div><div class="name">'+(l.no_leido?'<span class="unread-mark" title="No leído"></span>':'')+esc(l.nombre||'Sin nombre')+'</div><div class="phone">+'+esc(l.telefono.replace('@s.whatsapp.net','').replace('@c.us',''))+'</div></div><span class="pill '+esc(l.sentiment_label||'neutral')+'">'+(l.sentiment_score||50)+'/100</span></div><div class="cal-row">'+(l.calificado?'<span class="pill cal-yes">✓ Calificado</span>':'<span class="pill cal-no">Sin calificar</span>')+'</div><div class="data"><div><strong>Rubro:</strong> '+esc(l.rubro)+'</div><div><strong>Interés:</strong> '+esc(l.interes)+'</div><div><strong>Próxima:</strong> '+esc(l.proxima_accion||'Sin definir')+'</div></div><div class="actions"><button class="sales-open" data-tel="'+esc(l.telefono)+'">Chat</button><button class="sales-followup" data-tel="'+esc(l.telefono)+'">Seguimiento</button><button class="sales-opportunity" data-tel="'+esc(l.telefono)+'">Datos</button><button class="sales-qualify" data-tel="'+esc(l.telefono)+'" data-calificado="'+(l.calificado?'1':'0')+'">'+(l.calificado?'Quitar calificación':'Marcar calificado')+'</button><button class="sales-delete" data-tel="'+esc(l.telefono)+'" style="background:#7f1d1d">Eliminar</button></div></article>'}).join('')||'<div class="empty">Sin oportunidades</div>'});document.querySelectorAll('.sales-card').forEach(function(c){c.addEventListener('dragstart',function(e){e.dataTransfer.setData('sales-tel',c.dataset.tel)})});document.querySelectorAll('[data-sales-stage]').forEach(function(c){c.ondragover=function(e){e.preventDefault()};c.ondrop=async function(e){var tel=e.dataTransfer.getData('sales-tel');if(!tel)return;var r=await fetch('/leads/'+encodeURIComponent(tel)+'/estado',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:c.dataset.salesStage})});if(r.ok){var d=await (await fetch('/leads')).json();leads=d.leads||[];renderSales()}}})}
+      function renderSales(){var box=document.getElementById('sales-pipeline');if(!box)return;var stages=window.crmStages||defaultStages;box.innerHTML=stages.map(function(s){return '<section class="stage" data-sales-stage="'+s[0]+'" style="min-height:300px"><h3>'+s[1]+' <span id="sales-count-'+s[0]+'">0</span></h3><div id="sales-col-'+s[0]+'"></div></section>'}).join('');stages.forEach(function(s){var key=s[0],items=leads.filter(function(l){return normalize(l)===key}),col=document.getElementById('sales-col-'+key);document.getElementById('sales-count-'+key).textContent=items.length;col.innerHTML=items.map(function(l){return '<article class="card sales-card'+(l.no_leido?' unread':'')+'" draggable="true" data-tel="'+esc(l.telefono)+'"><div class="cardtop"><div><div class="name">'+(l.no_leido?'<span class="unread-mark" title="No leído"></span>':'')+esc(l.nombre||'Sin nombre')+'</div><div class="phone">+'+esc(l.telefono.replace('@s.whatsapp.net','').replace('@c.us',''))+'</div></div><span class="pill '+esc(l.sentiment_label||'neutral')+'">'+(l.sentiment_score||50)+'/100</span></div><div class="cal-row">'+(l.calificado?'<span class="pill cal-yes">✓ Calificado</span>':'<span class="pill cal-no">Sin calificar</span>')+'</div><div class="data"><div><strong>Rubro:</strong> '+esc(l.rubro)+'</div><div><strong>Interés:</strong> '+esc(l.interes)+'</div><div><strong>Próxima:</strong> '+esc(l.proxima_accion||'Sin definir')+'</div></div><div class="actions"><button class="sales-open" data-tel="'+esc(l.telefono)+'">Chat</button><button class="sales-followup" data-tel="'+esc(l.telefono)+'">Seguimiento</button><button class="sales-opportunity" data-tel="'+esc(l.telefono)+'">Datos</button><button class="sales-qualify" data-tel="'+esc(l.telefono)+'" data-calificado="'+(l.calificado?'1':'0')+'">'+(l.calificado?'Quitar calificación':'Marcar calificado')+'</button>'+((normalize(l)==='ganado'||normalize(l)==='perdido')?'<button class="sales-set" data-estado="contactado" data-tel="'+esc(l.telefono)+'" title="Volver a abrir la oportunidad">↺ Reabrir</button>':'<button class="sales-set" data-estado="ganado" data-tel="'+esc(l.telefono)+'" style="background:#166534;color:#dcfce7">✓ Ganado</button><button class="sales-set" data-estado="perdido" data-tel="'+esc(l.telefono)+'" style="background:#3f3f46;color:#fca5a5">✕ Perdido</button>')+'<button class="sales-delete" data-tel="'+esc(l.telefono)+'" style="background:#7f1d1d">Eliminar</button></div></article>'}).join('')||'<div class="empty">Sin oportunidades</div>'});document.querySelectorAll('.sales-card').forEach(function(c){c.addEventListener('dragstart',function(e){e.dataTransfer.setData('sales-tel',c.dataset.tel)})});document.querySelectorAll('[data-sales-stage]').forEach(function(c){c.ondragover=function(e){e.preventDefault()};c.ondrop=async function(e){var tel=e.dataTransfer.getData('sales-tel');if(!tel)return;var r=await fetch('/leads/'+encodeURIComponent(tel)+'/estado',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:c.dataset.salesStage})});if(r.ok){var d=await (await fetch('/leads')).json();leads=d.leads||[];renderSales()}}})}
       document.addEventListener('click',function(e){var b=e.target.closest('.sales-open,.sales-followup,.sales-opportunity');if(!b)return;var l=leads.find(function(x){return x.telefono===b.dataset.tel});if(!l)return;if(b.classList.contains('sales-open'))openChat(encodeURIComponent(b.dataset.tel),l.nombre||b.dataset.tel);if(b.classList.contains('sales-followup'))openFollowup(b.dataset.tel);if(b.classList.contains('sales-opportunity'))openOpportunity(b.dataset.tel)});
       document.addEventListener('click',async function(e){var b=e.target.closest('.sales-delete');if(!b)return;if(!confirm('Eliminar definitivamente este lead y toda su conversación? Esta acción no se puede deshacer.'))return;var r=await fetch('/leads/'+encodeURIComponent(b.dataset.tel),{method:'DELETE'});if(r.ok){var d=await (await fetch('/leads')).json();leads=d.leads||[];renderSales()}else alert('No se pudo eliminar el lead')});
       document.addEventListener('click',async function(e){var b=e.target.closest('.sales-qualify');if(!b)return;var nuevoValor=b.dataset.calificado!=='1';var r=await fetch('/leads/'+encodeURIComponent(b.dataset.tel)+'/calificado',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({calificado:nuevoValor})});if(r.ok){var d=await (await fetch('/leads')).json();leads=d.leads||[];renderSales();if(window.renderAnalytics)window.renderAnalytics()}else alert('No se pudo actualizar la calificación')});
       var previousLoad=load;load=async function(){await previousLoad();renderSales()};previousLoad().then(renderSales);setInterval(async function(){var d=await (await fetch('/leads')).json();leads=d.leads||[];renderSales()},30000);
+      // Cerrar como ganado o perdido desde cualquier etapa (y reabrir si hizo falta)
+      document.addEventListener('click',async function(e){var b=e.target.closest('.sales-set');if(!b)return;b.disabled=true;var r=await fetch('/leads/'+encodeURIComponent(b.dataset.tel)+'/estado',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:b.dataset.estado})});if(r.ok){var d=await (await fetch('/leads')).json();leads=d.leads||[];renderSales();if(window.renderAnalytics)window.renderAnalytics();if(window.updateUnreadBadges)window.updateUnreadBadges()}else{b.disabled=false;alert('No se pudo actualizar la etapa')}});
       window.renderSales=renderSales;
     })();
     </script>'''
