@@ -1,0 +1,6 @@
+node_modules
+bridge/node_modules
+.git
+*.db
+__pycache__
+.env

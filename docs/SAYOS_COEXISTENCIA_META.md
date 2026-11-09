@@ -1,4 +1,24 @@
-# Sayos CRM: deploy y vinculación de WhatsApp Business por coexistencia
+# Sayos CRM: deploy y vinculación de WhatsApp
+
+# Opción activa: puente propio por QR (estilo WhatsApp Web)
+
+`WHATSAPP_PROVIDER=bridge`. Gratis y sin depender de Meta ni de Whapi.
+
+1. CRM → **Canales** → tarjeta **WhatsApp vinculado por QR** → aparece el QR.
+2. En el teléfono: WhatsApp Business → **Dispositivos vinculados → Vincular un dispositivo** → escanear.
+3. Listo: lo que escriben los clientes y lo que contestás desde el teléfono entra a **Conversaciones**. Nadie responde automáticamente.
+
+Cómo funciona: `bridge/index.mjs` (Node + Baileys) corre en el mismo servicio de Render, se conecta como dispositivo vinculado y reenvía cada mensaje al CRM firmado con un secreto interno. La sesión se guarda en PostgreSQL (tabla `wa_auth`): no hay que reescanear tras un deploy.
+
+- `BRIDGE_ENVIO=false` → solo lectura total: el CRM no puede mandar nada por WhatsApp.
+- `KEEPALIVE=true` → se pide `/health` cada 10 min para que el plan gratis de Render no se duerma (dormido no recibe mensajes; al despertar recupera los de las últimas 72 h).
+- **Riesgo:** no es la API oficial (va contra los términos de WhatsApp). Usado para leer y contestar normal, el riesgo de bloqueo es bajo pero no cero. Probar primero con un número propio.
+- Si el teléfono no abre WhatsApp en 14 días, WhatsApp desvincula el dispositivo: reescanear.
+- Grupos, estados, canales y reacciones se ignoran. Fotos, audios y documentos aparecen como `[Imagen]`, `[Audio]`, etc.
+
+---
+
+# Alternativa oficial: coexistencia de Meta
 
 Modo de esta instancia: **CRM de solo lectura** (`BOT_ENABLED=false`).
 No responde nada automáticamente. Guarda lo que escriben los clientes y lo que

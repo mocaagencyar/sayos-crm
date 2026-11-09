@@ -17,6 +17,9 @@ def obtener_proveedor() -> ProveedorWhatsApp:
     if proveedor == "whapi":
         from agent.providers.whapi import ProveedorWhapi
         return ProveedorWhapi()
+    elif proveedor == "bridge":
+        from agent.providers.bridge import ProveedorBridge
+        return ProveedorBridge()
     elif proveedor == "meta":
         from agent.providers.meta import ProveedorMeta
         return ProveedorMeta()
@@ -24,4 +27,4 @@ def obtener_proveedor() -> ProveedorWhatsApp:
         from agent.providers.twilio import ProveedorTwilio
         return ProveedorTwilio()
     else:
-        raise ValueError(f"Proveedor no soportado: {proveedor}. Usa: whapi, meta, o twilio")
+        raise ValueError(f"Proveedor no soportado: {proveedor}. Usa: bridge, whapi, meta o twilio")

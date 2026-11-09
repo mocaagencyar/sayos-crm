@@ -5,6 +5,7 @@ Modo actual: **solo lectura, sin bot** (`BOT_ENABLED=false`). Registra las
 conversaciones del WhatsApp comercial (incluidas las respuestas que el equipo
 da desde el teléfono), arma el pipeline de leads y permite contestar a mano.
 
+- WhatsApp: puente propio por QR (`bridge/`), con la API oficial de Meta como alternativa
 - Deploy y vinculación del número: [`docs/SAYOS_COEXISTENCIA_META.md`](docs/SAYOS_COEXISTENCIA_META.md)
 - Datos del negocio: `config/business.yaml` · Prompt (inactivo): `config/prompts.yaml`
 - Blueprint de Render: `render.yaml`

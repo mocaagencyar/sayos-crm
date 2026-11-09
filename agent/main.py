@@ -692,6 +692,24 @@ async def update_settings(payload: dict, _usuario: str = Depends(autenticar_dash
     return await guardar_configuracion({"pipeline": {"etapas": etapas, "campos": campos}, "workspace": payload.get("workspace", {})})
 
 
+@app.get("/api/bridge/status")
+async def bridge_status(_usuario: str = Depends(autenticar_dashboard)):
+    """Estado del WhatsApp vinculado por QR (puente local) y QR a escanear."""
+    if not hasattr(proveedor, "estado"):
+        return {"activo": False}
+    return {"activo": True, **await proveedor.estado()}
+
+
+@app.post("/api/bridge/logout")
+async def bridge_logout(_usuario: str = Depends(autenticar_dashboard)):
+    """Desvincula el WhatsApp del puente; queda listo para escanear un QR nuevo."""
+    if not hasattr(proveedor, "desvincular"):
+        raise HTTPException(status_code=400, detail="El puente de WhatsApp no está activo")
+    if not await proveedor.desvincular():
+        raise HTTPException(status_code=502, detail="No se pudo desvincular")
+    return {"status": "ok"}
+
+
 @app.get("/api/meta/embedded-signup/config")
 async def embedded_signup_config(_usuario: str = Depends(autenticar_dashboard)):
     """Devuelve sólo datos públicos necesarios para abrir el diálogo de Meta."""
@@ -1069,6 +1087,10 @@ document.querySelector('.tabs').insertAdjacentHTML('beforeend','<button class="t
       // Cerrar como ganado o perdido desde cualquier etapa (y reabrir si hizo falta)
       document.addEventListener('click',async function(e){var b=e.target.closest('.sales-set');if(!b)return;b.disabled=true;var r=await fetch('/leads/'+encodeURIComponent(b.dataset.tel)+'/estado',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({estado:b.dataset.estado})});if(r.ok){var d=await (await fetch('/leads')).json();leads=d.leads||[];renderSales();if(window.renderAnalytics)window.renderAnalytics();if(window.updateUnreadBadges)window.updateUnreadBadges()}else{b.disabled=false;alert('No se pudo actualizar la etapa')}});
       window.renderSales=renderSales;
+      // ── WhatsApp vinculado por QR (puente local) ──
+      var bridgeTimer=null;
+      async function renderBridge(){var box=document.getElementById('channels');if(!box)return;var d;try{d=await (await fetch('/api/bridge/status',{cache:'no-store'})).json()}catch(e){return}if(!d.activo){var o=document.getElementById('bridge-card');if(o)o.remove();return}var card=document.getElementById('bridge-card');if(!card){card=document.createElement('div');card.id='bridge-card';card.className='channel';card.style.gridColumn='1/-1';box.insertAdjacentElement('beforebegin',card)}var st={conectado:'● Conectado',qr:'● Esperando escaneo',iniciando:'● Iniciando…',reconectando:'● Reconectando…',desconectado:'● Desconectado',apagado:'● Puente apagado'}[d.estado]||d.estado;var on=d.estado==='conectado';var html='<div style="display:flex;gap:22px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:240px"><div class="icon">W</div><h3>WhatsApp vinculado por QR</h3><div class="status '+(on?'':'off')+'">'+st+(on&&d.numero?' · +'+esc(d.numero):'')+'</div>';if(d.estado==='qr'){html+='<p>En el teléfono: WhatsApp Business → <b>Dispositivos vinculados</b> → <b>Vincular un dispositivo</b> y escaneá este código. Se renueva solo cada pocos segundos.</p>'}else if(on){html+='<p>Todo lo que entra y lo que contestás desde el teléfono aparece en <b>Conversaciones</b>. Nadie responde automáticamente.'+(d.envio_habilitado?'':' El envío desde el CRM está deshabilitado.')+'</p><button id="bridge-logout" class="connect off" style="width:auto">Desvincular</button>'}else{html+='<p>'+(d.error?esc(d.error):'Preparando la conexión…')+'</p>'}html+='</div>';if(d.estado==='qr'&&d.qr){html+='<img src="'+d.qr+'" alt="QR de WhatsApp" style="width:240px;height:240px;background:#fff;border-radius:12px;padding:8px">'}html+='</div>';card.innerHTML=html;var lo=document.getElementById('bridge-logout');if(lo)lo.onclick=async function(){if(!confirm('¿Desvincular este WhatsApp del CRM? Vas a tener que escanear el QR de nuevo.'))return;await fetch('/api/bridge/logout',{method:'POST'});renderBridge()}}
+      var prevLoadChannels=loadChannels;loadChannels=async function(){await prevLoadChannels();renderBridge();clearInterval(bridgeTimer);bridgeTimer=setInterval(function(){var p=document.getElementById('canales');if(p&&p.classList.contains('active'))renderBridge();else clearInterval(bridgeTimer)},4000)};
     })();
     </script>'''
     response.body = response.body.replace(b'</body></html>', sales_script.encode('utf-8') + b'</body></html>', 1)

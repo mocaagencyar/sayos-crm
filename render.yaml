@@ -32,7 +32,11 @@ services:
       - key: BOT_ENABLED
         value: "false"
       - key: WHATSAPP_PROVIDER
-        value: meta
+        value: bridge
+      - key: BRIDGE_ENVIO
+        value: "true"
+      - key: KEEPALIVE
+        value: "true"
       - key: META_GRAPH_VERSION
         value: v23.0
       - key: META_VERIFY_TOKEN
