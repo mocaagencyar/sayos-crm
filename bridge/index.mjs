@@ -18,6 +18,8 @@ import pino from 'pino'
 import QRCode from 'qrcode'
 import pg from 'pg'
 import http from 'node:http'
+import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 
 // ── Compatibilidad entre versiones de Baileys (v6 CommonJS / v7 ESM) ──────
 const pick = (n) => B[n] ?? B.default?.[n]
@@ -358,6 +360,15 @@ const servidor = http.createServer(async (req, res) => {
     return responder(res, 500, { error: e.message })
   }
 })
+
+let versionBaileys = '?'
+try {
+  const ruta = createRequire(import.meta.url).resolve('baileys/package.json')
+  versionBaileys = JSON.parse(readFileSync(ruta, 'utf8')).version
+} catch (_) {
+  try { versionBaileys = JSON.parse(readFileSync(new URL('./node_modules/baileys/package.json', import.meta.url), 'utf8')).version } catch (_) {}
+}
+console.log('[bridge] Baileys', versionBaileys, '· Node', process.version)
 
 servidor.listen(PUERTO_PUENTE, '127.0.0.1', () => {
   console.log(`[bridge] API interna en 127.0.0.1:${PUERTO_PUENTE} · envío ${ENVIO_HABILITADO ? 'habilitado' : 'deshabilitado'}`)
