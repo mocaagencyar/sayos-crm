@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  agent:
+    build: .
+    container_name: max-mc-growth-agency
+    ports:
+      - "${PORT:-8000}:8000"
+    env_file:
+      - .env
+    volumes:
+      # Montar knowledge y config para poder actualizarlos sin rebuild
+      - ./knowledge:/app/knowledge
+      - ./config:/app/config
+      # Persistir la base de datos SQLite
+      - ./agentkit.db:/app/agentkit.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

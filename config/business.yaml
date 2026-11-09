@@ -1,0 +1,40 @@
+# Configuración del negocio — Generado por AgentKit
+# PLANTILLA — completá estos datos con los del cliente antes de hacer deploy.
+# Este archivo lo lee agent/tools.py (cargar_info_negocio) y se usa en:
+#   - El fallback del system prompt (agent/brain.py)
+#   - El health check y las notificaciones de Telegram (ya no dicen un cliente fijo)
+#   - El prompt real del agente vive en config/prompts.yaml — ahí va el detalle grande.
+
+negocio:
+  nombre: "Nombre del negocio"
+  descripcion: >
+    Descripción breve de a qué se dedica el negocio, a quién le vende
+    y qué lo diferencia. Esto alimenta el contexto que usa Max para
+    responder — cuanto más específico, mejor califica a los leads.
+  horario: "Lunes a Viernes 9am a 6pm"
+  web: "tudominio.com"
+  email: "hola@tudominio.com"
+
+agente:
+  nombre: "Max"
+  tono: "Empático y cálido"
+  casos_de_uso:
+    - "Calificar leads potenciales del negocio"
+    - "Agendar reuniones o auditorías con prospectos calificados"
+    - "Responder preguntas frecuentes sobre los servicios"
+    - "Manejar objeciones comunes con argumentos preparados"
+
+servicios:
+  paquete_01:
+    nombre: "Nombre del paquete/servicio 1"
+    incluye:
+      - "Detalle 1"
+      - "Detalle 2"
+    precio_setup: "Precio de setup, si aplica"
+    precio_mensual: "Precio mensual, si aplica"
+    nota: "Aclaraciones del paquete"
+
+metadata:
+  creado: "AAAA-MM-DD"
+  version: "1.0"
+  generado_por: "AgentKit"

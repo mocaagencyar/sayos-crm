@@ -1,0 +1,60 @@
+name: Monitor Max
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  healthcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Restaurar estado anterior
+        uses: actions/cache/restore@v4
+        with:
+          path: .monitor-state
+          key: max-monitor-state-${{ github.run_id }}
+          restore-keys: max-monitor-state-
+
+      - name: Revisar servicio y notificar cambios
+        env:
+          HEALTH_URL: ${{ secrets.MAX_HEALTH_URL }}
+          MONITOR_SECRET: ${{ secrets.MAX_MONITOR_SECRET }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        shell: bash
+        run: |
+          set +e
+          mkdir -p .monitor-state
+          previous="$(cat .monitor-state/status 2>/dev/null || echo up)"
+          base_url="${HEALTH_URL%/}"
+          response="$(curl -fsS --max-time 25 "$base_url/health/ai" -H "x-monitor-secret: $MONITOR_SECRET" 2>/dev/null)"
+          if [ $? -eq 0 ] && echo "$response" | grep -q '"status":"ok"'; then
+            current="up"
+          else
+            current="down"
+          fi
+
+          if [ "$current" != "$previous" ]; then
+            if [ "$current" = "down" ]; then
+              text="🚨 ALERTA: Max no responde\n\nEl servicio no está respondiendo correctamente. Revisá Render y sus logs.\n\nHora: $(date -u '+%d/%m/%Y %H:%M UTC')"
+            else
+              text="✅ Max volvió a funcionar\n\nEl servicio está respondiendo nuevamente.\n\nHora: $(date -u '+%d/%m/%Y %H:%M UTC')"
+            fi
+            curl -sS --max-time 20 -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -H 'Content-Type: application/json' \
+              --data "$(python -c 'import json,sys; print(json.dumps({"chat_id":sys.argv[1],"text":sys.argv[2]}))' "$TELEGRAM_CHAT_ID" "$text")" >/dev/null
+          fi
+
+          printf '%s' "$current" > .monitor-state/status
+          echo "Estado de Max: $current"
+
+      - name: Guardar estado actual
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .monitor-state
+          key: max-monitor-state-${{ github.run_id }}
