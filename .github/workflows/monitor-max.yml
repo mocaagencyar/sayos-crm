@@ -1,8 +1,10 @@
 name: Monitor Max
 
 on:
-  schedule:
-    - cron: "*/15 * * * *"
+  # Programación desactivada: el CRM de Sayos corre sin bot (sin Claude).
+  # Para monitorear cada 15 min, cargar los secrets MAX_* y descomentar:
+  # schedule:
+  #   - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:

@@ -13,4 +13,4 @@ COPY . .
 EXPOSE 8000
 
 # Arrancar el agente Max
-CMD ["uvicorn", "agent.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn agent.main:app --host 0.0.0.0 --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]

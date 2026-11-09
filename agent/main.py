@@ -42,9 +42,12 @@ logger = logging.getLogger("agentkit")
 proveedor = obtener_proveedor()
 instagram = None
 PORT = int(os.getenv("PORT", 8000))
-BOT_ENABLED = True
+# Modo CRM de solo lectura: con BOT_ENABLED=false (default) Max NUNCA responde.
+# Las conversaciones se guardan, avisan por Telegram y el equipo contesta a mano
+# desde el teléfono o desde el dashboard. Para activar el bot: BOT_ENABLED=true.
+BOT_ENABLED = os.getenv("BOT_ENABLED", "false").strip().lower() in {"1", "true", "si", "sí", "yes"}
 security = HTTPBasic(auto_error=False)
-SESSION_COOKIE = "mc_growth_session"
+SESSION_COOKIE = "crm_session"
 
 # ── Marca del workspace — configurable por cliente, sin tocar código ──────
 # Base blanca: los defaults son genéricos a propósito, NO los de ninguna
@@ -67,15 +70,37 @@ def _marca(html: str) -> str:
     El orden importa: la frase larga va antes que la corta para no dejarla
     pisada a medias (ej. "CRM" antes que una palabra que lo contenga).
     """
+    rgb = _hex_a_rgb(BRAND_COLOR)
     return (
         html
         .replace("#f47b20", BRAND_COLOR)
         .replace("#ff9a4d", BRAND_COLOR_2)
+        .replace("rgba(244,123,32,", f"rgba({rgb},")
+        .replace("#7c3f12", _oscurecer(BRAND_COLOR))
+        .replace("rgba(124,63,18,", f"rgba({rgb},")
+        .replace("#fed7aa", "#f4f4f5")
+        .replace("MC Growth OS<br>Lead intelligence", f"{BRAND_NAME}<br>{BRAND_TAGLINE}")
         .replace("MC Growth OS", BRAND_NAME)
         .replace("Growth OS · Lead intelligence", BRAND_TAGLINE)
         .replace("<div>MC Growth <small>", f"<div>{BRAND_COMPANY} <small>")
         .replace('class="mark">MC<', f'class="mark">{BRAND_SHORT}<')
+        .replace("● Max operativo", "● Max activo" if BOT_ENABLED else "● Modo lectura · sin bot")
     )
+
+
+def _hex_a_rgb(color: str) -> str:
+    c = color.lstrip("#")
+    if len(c) == 3:
+        c = "".join(x * 2 for x in c)
+    try:
+        return ",".join(str(int(c[i:i + 2], 16)) for i in (0, 2, 4))
+    except ValueError:
+        return "37,99,235"
+
+
+def _oscurecer(color: str, factor: float = 0.55) -> str:
+    r, g, b = (int(int(x) * factor) for x in _hex_a_rgb(color).split(","))
+    return f"#{r:02x}{g:02x}{b:02x}"
 
 
 def _firma_sesion(timestamp: str) -> str:
@@ -447,14 +472,19 @@ async def responder_desde_crm(telefono: str, request: Request, _usuario: str = D
         raise HTTPException(status_code=400, detail="El mensaje no puede estar vacío")
     proveedor_mensaje = proveedor
     canal_id = str(datos.get("canal_id", "")).strip()
-    if canal_id and proveedor.__class__.__name__ == "ProveedorMeta":
-        canal = await obtener_canal(canal_id)
+    if proveedor.__class__.__name__ == "ProveedorMeta":
+        if not canal_id:
+            # Sin canal explícito: se usa el primer número activo conectado
+            # (p. ej. el que se vinculó por coexistencia desde el dashboard).
+            activos = [c for c in await obtener_canales() if c["activo"] and c["configurado"]]
+            canal_id = activos[0]["phone_number_id"] if activos else ""
+        canal = await obtener_canal(canal_id) if canal_id else None
         if canal:
             from agent.providers.meta import ProveedorMeta
             proveedor_mensaje = ProveedorMeta(canal.access_token, canal.phone_number_id, canal.verify_token)
     enviado = await proveedor_mensaje.enviar_mensaje(telefono, mensaje)
     if not enviado:
-        raise HTTPException(status_code=502, detail="Meta no pudo enviar el mensaje")
+        raise HTTPException(status_code=502, detail="WhatsApp no pudo enviar el mensaje (fuera de la ventana de 24 h o canal sin configurar)")
     await guardar_mensaje(telefono, "assistant", mensaje, fuente="human")
     await establecer_control_contacto(telefono, False, str(datos.get("responsable", "Equipo comercial"))[:100], "Respuesta enviada desde el CRM")
     return {"status": "ok", "fuente": "human", "bot_activo": False}
@@ -495,7 +525,7 @@ async def exportar_leads_csv(_usuario: str = Depends(autenticar_dashboard)):
             lead["resumen"], lead["nota"], lead["proxima_accion"], lead["valor_oportunidad"], lead["origen"], lead["fecha_proxima_accion"], estado, lead["timestamp"],
         ])
     return _csv_response(
-        "mc-growth-leads.csv",
+        "leads.csv",
         ["telefono", "nombre", "rubro", "presupuesto", "interes", "sentiment_score", "sentiment_label", "resumen", "nota_interna", "proxima_accion", "valor_oportunidad", "origen", "fecha_proxima_accion", "estado", "fecha"],
         filas,
     )
@@ -506,7 +536,7 @@ async def exportar_conversaciones_csv(_usuario: str = Depends(autenticar_dashboa
     """Exporta todos los mensajes para respaldo y auditoría."""
     mensajes = await obtener_todos_los_mensajes()
     return _csv_response(
-        "mc-growth-conversaciones.csv",
+        "conversaciones.csv",
         ["telefono", "role", "mensaje", "fecha"],
         [[m["telefono"], m["role"], m["content"], m["timestamp"]] for m in mensajes],
     )
@@ -651,18 +681,74 @@ async def update_settings(payload: dict, _usuario: str = Depends(autenticar_dash
 @app.get("/api/meta/embedded-signup/config")
 async def embedded_signup_config(_usuario: str = Depends(autenticar_dashboard)):
     """Devuelve sólo datos públicos necesarios para abrir el diálogo de Meta."""
-    return {
-        "app_id": os.getenv("META_APP_ID", "1016554401027275"),
-        "config_id": os.getenv("META_EMBEDDED_SIGNUP_CONFIG_ID", "1398042952535570"),
-        "version": "v26.0",
-    }
+    app_id = os.getenv("META_APP_ID", "")
+    config_id = os.getenv("META_EMBEDDED_SIGNUP_CONFIG_ID", "")
+    if not app_id or not config_id:
+        raise HTTPException(status_code=503, detail="Faltan META_APP_ID y META_EMBEDDED_SIGNUP_CONFIG_ID en las variables de entorno")
+    return {"app_id": app_id, "config_id": config_id, "version": META_GRAPH_VERSION}
+
+
+META_GRAPH_VERSION = os.getenv("META_GRAPH_VERSION", "v23.0")
+
+
+@app.post("/api/meta/embedded-signup/complete")
+async def embedded_signup_complete(payload: dict, request: Request, _usuario: str = Depends(autenticar_dashboard)):
+    """
+    Cierra el flujo de Embedded Signup (coexistencia con WhatsApp Business App):
+    1. Canjea el `code` del popup por un business token (server-to-server).
+    2. Suscribe la app a la WABA del número con un webhook PROPIO de esta
+       instancia (override_callback_uri). Así no se toca el webhook general
+       de la app de Meta, que puede estar sirviendo a otro cliente.
+    3. Guarda el número como canal y pide a Meta la sincronización de
+       contactos e historial de la app (coexistencia).
+    """
+    import httpx
+
+    code = str(payload.get("code", "")).strip()
+    waba_id = str(payload.get("waba_id", "")).strip()
+    phone_number_id = str(payload.get("phone_number_id", "")).strip()
+    nombre = str(payload.get("nombre", "") or f"WhatsApp {BRAND_COMPANY}").strip()[:100]
+    app_id, app_secret = os.getenv("META_APP_ID", ""), os.getenv("META_APP_SECRET", "")
+    verify_token = os.getenv("META_VERIFY_TOKEN", "")
+    if not (code and waba_id and phone_number_id):
+        raise HTTPException(status_code=400, detail="Meta no devolvió code, waba_id y phone_number_id")
+    if not (app_id and app_secret and verify_token):
+        raise HTTPException(status_code=503, detail="Faltan META_APP_ID, META_APP_SECRET o META_VERIFY_TOKEN")
+
+    base = f"https://graph.facebook.com/{META_GRAPH_VERSION}"
+    callback = os.getenv("PUBLIC_BASE_URL", str(request.base_url)).rstrip("/").replace("http://", "https://") + "/webhook"
+    pasos = {}
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        r = await client.get(f"{base}/oauth/access_token", params={"client_id": app_id, "client_secret": app_secret, "code": code})
+        if r.status_code != 200 or "access_token" not in r.json():
+            logger.error(f"Embedded Signup: canje de código falló {r.status_code} {r.text}")
+            raise HTTPException(status_code=502, detail="Meta rechazó el código de autorización (puede haber vencido: repetí la vinculación)")
+        token = r.json()["access_token"]
+        auth = {"Authorization": f"Bearer {token}"}
+
+        r = await client.post(f"{base}/{waba_id}/subscribed_apps", headers=auth,
+                              json={"override_callback_uri": callback, "verify_token": verify_token})
+        pasos["webhook"] = r.status_code == 200
+        if not pasos["webhook"]:
+            logger.error(f"Embedded Signup: suscripción WABA falló {r.status_code} {r.text}")
+
+        canal = await guardar_canal(nombre, "whatsapp", phone_number_id, token, verify_token)
+
+        if payload.get("coexistencia", True):
+            for sync in ("smb_app_state_sync", "history"):
+                r = await client.post(f"{base}/{phone_number_id}/smb_app_data", headers=auth,
+                                      json={"messaging_product": "whatsapp", "sync_type": sync})
+                pasos[sync] = r.status_code == 200
+                if r.status_code != 200:
+                    logger.warning(f"Embedded Signup: sync {sync} → {r.status_code} {r.text}")
+    return {"status": "ok", "canal": canal, "webhook": callback, "pasos": pasos}
 
 
 @app.post("/api/channels")
 async def crear_canal(payload: dict, _usuario: str = Depends(autenticar_dashboard)):
     if payload.get("tipo") != "whatsapp" or not all(payload.get(k) for k in ("nombre", "phone_number_id", "access_token")):
         raise HTTPException(status_code=400, detail="Para WhatsApp se requiere nombre, Phone Number ID y token")
-    return await guardar_canal(payload["nombre"], "whatsapp", payload["phone_number_id"], payload["access_token"], payload.get("verify_token", os.getenv("META_VERIFY_TOKEN", "mcgrowth-webhook-2026")))
+    return await guardar_canal(payload["nombre"], "whatsapp", payload["phone_number_id"], payload["access_token"], payload.get("verify_token", os.getenv("META_VERIFY_TOKEN", "")))
 
 
 @app.post("/api/channels/whatsapp/toggle")
@@ -683,21 +769,56 @@ async def toggle_canal(canal_id: int, _usuario: str = Depends(autenticar_dashboa
 @app.post("/api/demo/seed")
 async def seed_demo_data(_usuario: str = Depends(autenticar_dashboard)):
     """Crea leads ficticios para probar el dashboard. No usa datos reales."""
+    # Leads ficticios (nombres y teléfonos inventados, prefijo 54911000000xx)
+    # con el tipo de consulta real de una fábrica de heladeras comerciales.
+    # Formato: (tel, nombre, rubro, presupuesto, interés, score, sentimiento, resumen, etapa,
+    #           valor, origen, [(rol, fuente, texto), ...])
     demos = [
-        ("5491100000001", "Lucía Demo", "Desarrolladora inmobiliaria", "USD 1.000/mes", "Más leads calificados para un lanzamiento", 84, "positivo", "Tiene campaña activa y busca mejorar la calidad de sus consultas.", "seguimiento"),
-        ("5491100000002", "Tomás Demo", "Inmobiliaria", "USD 700/mes", "Automatizar la respuesta inicial", 67, "positivo", "Cuenta con equipo comercial y quiere implementar pronto.", "cerrado"),
-        ("5491100000003", "Sofía Demo", "Estudio de arquitectura", "No indicó", "Landing de conversión", 48, "neutral", "Está explorando alternativas para más adelante.", "descartado"),
+        ("5491100000011", "Demo · Panadería La Espiga", "Panadería (Caballito)", "No indicó", "Heladera vertical 120 cm para tortas", 72, "positivo",
+         "Tiene local funcionando, quiere renovar la vitrina antes de fiestas.", "nuevo", "", "Meta Ads · Black Friday",
+         [("user", "user", "Hola! Vi la publicidad de las heladeras en stock. Tienen la vertical de 120?"),
+          ("user", "user", "Es para la panadería, en Caballito")]),
+        ("5491100000012", "Demo · Confitería Rivadavia", "Confitería (Flores)", "Hasta $7.000.000", "Heladera horizontal 150 cm repostería", 78, "positivo",
+         "Local con 20 años. Le preocupa que el equipo se rompa y nadie responda.", "contactado", "", "Meta Ads",
+         [("user", "user", "Buenas, quería consultar por una heladera exhibidora para tortas"),
+          ("assistant", "human", "Hola! Gracias por escribir a Sayos. ¿Me pasás el nombre y la dirección del local?"),
+          ("user", "user", "Confitería Rivadavia, Av. Rivadavia al 7000. Necesito una de 1,50 aprox"),
+          ("assistant", "human", "Perfecto. Tenemos la horizontal de 150 en stock. ¿Te queda bien que pasemos a medir esta semana?")]),
+        ("5491100000013", "Demo · Pastas Don Ángel", "Fábrica de pastas (Ramos Mejía)", "No indicó", "Mostrador refrigerado a medida", 81, "positivo",
+         "Abre segunda sucursal. Visita coordinada para medir el local.", "visita", "USD 9.000", "Google",
+         [("user", "user", "Hola, estamos abriendo otra sucursal y necesitamos el mostrador refrigerado"),
+          ("assistant", "human", "Buenísimo. Podemos ir a medir sin costo. ¿Qué día te queda bien?"),
+          ("user", "user", "El jueves a la mañana")]),
+        ("5491100000014", "Demo · Bombonería Belgrano", "Bombonería (Belgrano)", "$6.000.000 aprox", "Vertical 90 cm para bombones (18–24 °C)", 69, "neutral",
+         "Presupuesto enviado. Compara con dos proveedores más.", "propuesta", "$6.400.000 + IVA", "Instagram",
+         [("user", "user", "Necesito una heladera para bombones, no muy fría"),
+          ("assistant", "human", "Te mandé el presupuesto de la vertical de 90 a 18–24 °C. Garantía 12 meses y flete AMBA incluido."),
+          ("user", "user", "Gracias, lo estoy comparando y te aviso")]),
+        ("5491100000015", "Demo · Panificadora Lomas", "Panadería (Lomas de Zamora)", "No indicó", "Renovación de local completo", 63, "neutral",
+         "Pidió cuotas. Espera la opción de financiación bancaria.", "negociacion", "USD 18.000", "Referido",
+         [("user", "user", "El presupuesto está bien pero necesitamos financiarlo"),
+          ("assistant", "human", "Entiendo. Estamos viendo una opción bancaria, te confirmo el viernes.")]),
+        ("5491100000016", "Demo · Café Palermo", "Cafetería (Palermo)", "$9.500.000", "Vertical 150 cm símil madera", 88, "positivo",
+         "Cerró la compra. Entrega con instalación en AMBA.", "ganado", "$9.500.000 + IVA", "Meta Ads",
+         [("user", "user", "Listo, avanzamos con la vertical de 150 símil madera"),
+          ("assistant", "human", "Excelente! Te paso los datos para el anticipo y coordinamos la entrega.")]),
+        ("5491100000017", "Demo · Consulta particular", "Particular", "$2.500.000", "Heladera barata para casa", 30, "negativo",
+         "No es comercio. Busca precio bajo. Fuera del perfil.", "perdido", "", "Meta Ads",
+         [("user", "user", "Cuánto sale la más barata? Es para mi casa"),
+          ("assistant", "human", "Gracias por escribir. Nuestros equipos son para uso comercial, no tenemos opciones para hogar.")]),
     ]
     creados = 0
-    for telefono, nombre, rubro, presupuesto, interes, score, etiqueta, resumen, estado in demos:
+    for telefono, nombre, rubro, presupuesto, interes, score, etiqueta, resumen, estado, valor, origen, chat in demos:
         if await registrar_lead(telefono):
             await actualizar_info_lead(telefono, nombre, rubro, presupuesto, interes, score, etiqueta, resumen)
-            await guardar_mensaje(telefono, "user", f"Hola, soy {nombre}. Necesito ayuda para conseguir más oportunidades.")
-            await guardar_mensaje(telefono, "assistant", "¡Hola! Cuéntame un poco sobre tu negocio y qué objetivo quieres lograr.")
-            await guardar_mensaje(telefono, "user", f"Somos una {rubro.lower()} y nos interesa {interes.lower()}.")
+            for rol, fuente, texto in chat:
+                await guardar_mensaje(telefono, rol, texto, fuente=fuente)
             await cambiar_estado_lead(telefono, estado)
+            await actualizar_datos_oportunidad(telefono, valor_oportunidad=valor, origen=origen)
+            if fuente == "user":
+                await registrar_actividad(telefono)
             creados += 1
-    return {"status": "ok", "creados": creados, "mensaje": "Datos demo listos"}
+    return {"status": "ok", "creados": creados, "mensaje": "Leads de prueba listos (empiezan con «Demo ·»; se borran con Eliminar)"}
 
 
 @app.get("/dashboard-old", response_class=HTMLResponse)
@@ -857,7 +978,9 @@ document.addEventListener('click',function(e){if(e.target.closest('.channel-add'
 document.addEventListener('click',async function(e){if(!e.target.closest('#global-bot-btn'))return;await fetch('/api/channels/whatsapp/toggle',{method:'POST'});loadChannels()});
 var embeddedSignupPromise=null;
 function prepararEmbeddedSignup(){if(embeddedSignupPromise)return embeddedSignupPromise;embeddedSignupPromise=(async function(){var cfg=await (await fetch('/api/meta/embedded-signup/config',{cache:'no-store'})).json();if(!window.FB){await new Promise(function(resolve,reject){var s=document.createElement('script');s.src='https://connect.facebook.net/en_US/sdk.js';s.onload=resolve;s.onerror=function(){reject(new Error('El navegador no pudo cargar el SDK de Meta'))};document.head.appendChild(s)});if(!window.FB)throw new Error('El SDK de Meta no quedó disponible');window.FB.init({appId:cfg.app_id,cookie:true,xfbml:false,version:cfg.version})}return cfg})().catch(function(err){embeddedSignupPromise=null;throw err});return embeddedSignupPromise}
-function abrirEmbeddedSignup(){prepararEmbeddedSignup().then(function(cfg){if(!window.FB||typeof window.FB.login!=='function')throw new Error('El SDK de Meta no está disponible en este navegador');window.FB.login(function(response){if(response.authResponse&&response.authResponse.code){alert('Meta autorizó el flujo. Estamos listos para completar el intercambio seguro en el servidor.')}else if(response.authResponse){alert('Meta respondió, pero no devolvió código de autorización. Revisemos el flujo.')}else{alert('La vinculación fue cancelada o Meta no la habilitó para esta cuenta.')}},{config_id:cfg.config_id,response_type:'code',override_default_response_type:true,extras:{feature:'whatsapp_embedded_signup',sessionInfoVersion:'3'}})}).catch(function(err){alert('No se pudo abrir Meta: '+err.message+' Probá desde Chrome o Edge si estás dentro del navegador interno.')})}
+var esSession={};window.addEventListener('message',function(ev){if(typeof ev.origin!=='string'||ev.origin.indexOf('facebook.com')===-1)return;try{var d=typeof ev.data==='string'?JSON.parse(ev.data):ev.data;if(d&&d.type==='WA_EMBEDDED_SIGNUP'){if(d.data&&d.data.waba_id)esSession.waba_id=d.data.waba_id;if(d.data&&d.data.phone_number_id)esSession.phone_number_id=d.data.phone_number_id;esSession.event=d.event}}catch(_){}});
+async function completarEmbeddedSignup(code){for(var i=0;i<20&&!(esSession.waba_id&&esSession.phone_number_id);i++){await new Promise(function(r){setTimeout(r,250)})}if(!esSession.waba_id||!esSession.phone_number_id){alert('Meta autorizó, pero no informó la cuenta y el número (evento: '+(esSession.event||'ninguno')+'). Repetí la vinculación.');return}var r=await fetch('/api/meta/embedded-signup/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:code,waba_id:esSession.waba_id,phone_number_id:esSession.phone_number_id,coexistencia:true})});var d=await r.json();if(!r.ok){alert(d.detail||'No se pudo completar la vinculación');return}alert('Número conectado. Webhook: '+d.webhook+(d.pasos&&d.pasos.webhook===false?' (ATENCIÓN: Meta no aceptó el webhook, revisá los logs)':''));loadChannels()}
+function abrirEmbeddedSignup(){esSession={};prepararEmbeddedSignup().then(function(cfg){if(!window.FB||typeof window.FB.login!=='function')throw new Error('El SDK de Meta no está disponible en este navegador');window.FB.login(function(response){if(response.authResponse&&response.authResponse.code){completarEmbeddedSignup(response.authResponse.code)}else if(response.authResponse){alert('Meta respondió, pero no devolvió código de autorización. Revisemos el flujo.')}else{alert('La vinculación fue cancelada o Meta no la habilitó para esta cuenta.')}},{config_id:cfg.config_id,response_type:'code',override_default_response_type:true,extras:{setup:{},featureType:'whatsapp_business_app_onboarding',sessionInfoVersion:'3'}})}).catch(function(err){alert('No se pudo abrir Meta: '+err.message+' Probá desde Chrome o Edge si estás dentro del navegador interno.')})}
 prepararEmbeddedSignup();
 document.addEventListener('click',function(e){if(e.target.closest('.embedded-signup'))abrirEmbeddedSignup()});
 document.addEventListener('click',function(e){var b=e.target.closest('.open-inbox-chat');if(b){var l=leads.find(function(x){return x.telefono===b.dataset.tel});openChat(encodeURIComponent(b.dataset.tel),l?(l.nombre||b.dataset.tel):b.dataset.tel)}});
@@ -958,6 +1081,10 @@ document.querySelector('.tabs').insertAdjacentHTML('beforeend','<button class="t
     })();
     </script>'''
     response.body = response.body.replace(b'</body></html>', workspace_script.encode('utf-8') + b'</body></html>', 1)
+    if not BOT_ENABLED:
+        # Modo lectura: sin controles de bot, para que el equipo no lo prenda por error.
+        ocultar = b'<style>.takeover,.resume-max,.crm-toggle,#global-bot-toggle{display:none!important}</style>'
+        response.body = response.body.replace(b'</head>', ocultar + b'</head>', 1)
     response.body = _marca(response.body.decode("utf-8")).encode("utf-8")
     response.headers["Content-Length"] = str(len(response.body))
     return response

@@ -22,15 +22,29 @@ class ProveedorWhapi(ProveedorWhatsApp):
         body = await request.json()
         mensajes = []
         for msg in body.get("messages", []):
+            chat_id = msg.get("chat_id", "")
+            # Grupos, canales y estados no son conversaciones comerciales
+            if not chat_id or not chat_id.endswith(("@s.whatsapp.net", "@c.us")):
+                continue
             # Solo procesamos mensajes de texto
-            texto = msg.get("text", {}).get("body", "")
+            texto = (msg.get("text") or {}).get("body", "")
             if not texto:
                 continue
+            propio = bool(msg.get("from_me", False))
+            # Lo que escribe el equipo desde el teléfono llega con from_me=True:
+            # se guarda como respuesta humana ("Comercial") en el historial.
+            # Lo que envía la API (bot/dashboard) trae source="api" y se ignora
+            # para no duplicarlo.
+            origen = "user"
+            if propio:
+                origen = "bot" if msg.get("source") == "api" else "human"
             mensajes.append(MensajeEntrante(
-                telefono=msg.get("chat_id", ""),
+                telefono=chat_id.split("@", 1)[0],
                 texto=texto,
                 mensaje_id=msg.get("id", ""),
-                es_propio=msg.get("from_me", False),
+                es_propio=propio,
+                origen=origen,
+                nombre_contacto="" if propio else msg.get("from_name", ""),
             ))
         return mensajes
 

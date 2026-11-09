@@ -8,7 +8,7 @@ from agent.providers.base import ProveedorWhatsApp, MensajeEntrante
 class ProveedorInstagram(ProveedorWhatsApp):
     def __init__(self, access_token=None, verify_token=None):
         self.access_token = access_token or os.getenv("INSTAGRAM_ACCESS_TOKEN")
-        self.verify_token = verify_token or os.getenv("INSTAGRAM_VERIFY_TOKEN", "mcgrowth-instagram-2026")
+        self.verify_token = verify_token or os.getenv("INSTAGRAM_VERIFY_TOKEN", "")
         self.api_version = os.getenv("META_API_VERSION", "v21.0")
         self.login_mode = os.getenv("INSTAGRAM_LOGIN_MODE", "instagram").lower()
         self.ig_user_id = os.getenv("INSTAGRAM_IG_USER_ID")

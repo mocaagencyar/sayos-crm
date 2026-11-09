@@ -1,40 +1,64 @@
-# Configuración del negocio — Generado por AgentKit
-# PLANTILLA — completá estos datos con los del cliente antes de hacer deploy.
-# Este archivo lo lee agent/tools.py (cargar_info_negocio) y se usa en:
-#   - El fallback del system prompt (agent/brain.py)
-#   - El health check y las notificaciones de Telegram (ya no dicen un cliente fijo)
-#   - El prompt real del agente vive en config/prompts.yaml — ahí va el detalle grande.
+# Configuración del negocio — Sayos
+# Lo lee agent/tools.py (cargar_info_negocio): health check, Telegram y
+# fallback del prompt. El detalle conversacional está en config/prompts.yaml.
+#
+# MODO ACTUAL: CRM de solo lectura (BOT_ENABLED=false). Max no responde;
+# estos datos quedan listos para cuando se active un bot de primera respuesta.
 
 negocio:
-  nombre: "Nombre del negocio"
+  nombre: "Sayos"
   descripcion: >
-    Descripción breve de a qué se dedica el negocio, a quién le vende
-    y qué lo diferencia. Esto alimenta el contexto que usa Max para
-    responder — cuanto más específico, mejor califica a los leads.
-  horario: "Lunes a Viernes 9am a 6pm"
-  web: "tudominio.com"
-  email: "hola@tudominio.com"
+    Fábrica familiar argentina desde 1975 (50 años) de heladeras comerciales y
+    muebles en acero inoxidable a medida para panaderías, confiterías, fábricas
+    de pasta, bombonerías y cafeterías de CABA y GBA. Fabricación propia,
+    acero inoxidable interior y exterior, condensadora independiente del
+    evaporador (reparable por cualquier técnico), estantes con caños inox 20/20,
+    DVH con antiempañante y frío uniforme. Visita sin costo, plano 2D en 48 hs,
+    presupuesto cerrado sin adicionales, garantía de 12 meses.
+  horario: "WhatsApp lunes a viernes 9 a 17 hs · Showroom (Av. Jujuy 823, CABA) lunes a viernes 9 a 13:30 hs"
+  web: "sayos.com.ar"
+  email: ""            # PENDIENTE: email comercial de Sayos
+  whatsapp: "+54 9 11 2766 0405"
+  instagram: "sayos_instalaciones"
+  zona: "Solo AMBA (CABA y GBA). Interior en pausa."
 
 agente:
   nombre: "Max"
-  tono: "Empático y cálido"
+  activo: false        # Se controla con la variable BOT_ENABLED
+  tono: "Cercano, técnico y sin presión de venta"
   casos_de_uso:
-    - "Calificar leads potenciales del negocio"
-    - "Agendar reuniones o auditorías con prospectos calificados"
-    - "Responder preguntas frecuentes sobre los servicios"
-    - "Manejar objeciones comunes con argumentos preparados"
+    - "Registrar todas las conversaciones del WhatsApp comercial"
+    - "Calificar si el contacto es un comercio con local funcionando en AMBA"
+    - "Derivar a visita sin costo o al showroom"
 
 servicios:
-  paquete_01:
-    nombre: "Nombre del paquete/servicio 1"
+  linea_estandar:
+    nombre: "Línea estándar (Gatwick)"
     incluye:
-      - "Detalle 1"
-      - "Detalle 2"
-    precio_setup: "Precio de setup, si aplica"
-    precio_mensual: "Precio mensual, si aplica"
-    nota: "Aclaraciones del paquete"
+      - "4 horizontales: 90 / 120 / 150 / 200 cm de ancho, 70 de fondo, 130 de alto"
+      - "4 verticales: 70 / 90 / 120 / 150 cm de ancho, 70 de fondo, 170 de alto"
+      - "Acero esmerilado, color o símil madera"
+      - "Repostería 4–6 °C o bombones 18–24 °C (nunca frío negativo)"
+      - "Stock o entrega en 30–45 días; flete gratis AMBA con instalación"
+    precio: "No se publica por WhatsApp: se da al cierre del presupuesto"
+    nota: "Precio publicable, vigencia y marca (Sayos o segunda marca) pendientes de definir con Franco"
+  a_medida:
+    nombre: "Muebles e instalaciones a medida"
+    incluye:
+      - "Heladeras, vitrinas, paneras, factureras, mueble caja, esquinero, mostrador exhibidor"
+      - "Visita sin costo en 24–72 hs, plano 2D en 48 hs, render 3D si avanza"
+      - "Fabricación 45–90 días, presupuesto cerrado sin adicionales"
+    precio: "20% a 60% más que la línea estándar; se cotiza tras la visita"
+
+condiciones:
+  pago: "50% de anticipo + echeq a 30/60 días"
+  garantia: "12 meses directa"
+
+cliente_ideal:
+  si: "Dueño o socio de panadería, confitería, fábrica de pastas, bombonería, sandwichería o cafetería que ya funciona en CABA/GBA y renueva, amplía o abre sucursal. Secundario: arquitecto o diseñador que especifica."
+  no: "Proyectos 'por abrir' sin local, curiosos de precio, particulares, técnicos de service o repuestos, interior del país (por ahora)."
 
 metadata:
-  creado: "AAAA-MM-DD"
+  creado: "2026-11-09"
   version: "1.0"
-  generado_por: "AgentKit"
+  fuente: "Memoria del proyecto Sayos (onboarding oct–nov 2026)"

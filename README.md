@@ -1,3 +1,16 @@
+# Sayos CRM
+
+CRM de WhatsApp de **Sayos** (heladeras comerciales y muebles en acero inoxidable).
+Modo actual: **solo lectura, sin bot** (`BOT_ENABLED=false`). Registra las
+conversaciones del WhatsApp comercial (incluidas las respuestas que el equipo
+da desde el teléfono), arma el pipeline de leads y permite contestar a mano.
+
+- Deploy y vinculación del número: [`docs/SAYOS_COEXISTENCIA_META.md`](docs/SAYOS_COEXISTENCIA_META.md)
+- Datos del negocio: `config/business.yaml` · Prompt (inactivo): `config/prompts.yaml`
+- Blueprint de Render: `render.yaml`
+
+---
+
 # AgentKit — WhatsApp AI Agent Builder
 
 > **Esta es la base reutilizable del CRM.** No la uses directo para un cliente real —

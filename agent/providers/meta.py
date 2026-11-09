@@ -16,8 +16,8 @@ class ProveedorMeta(ProveedorWhatsApp):
     def __init__(self, access_token=None, phone_number_id=None, verify_token=None):
         self.access_token = access_token or os.getenv("META_ACCESS_TOKEN")
         self.phone_number_id = phone_number_id or os.getenv("META_PHONE_NUMBER_ID")
-        self.verify_token = verify_token or os.getenv("META_VERIFY_TOKEN", "mcgrowth-webhook-2026")
-        self.api_version = "v21.0"
+        self.verify_token = verify_token or os.getenv("META_VERIFY_TOKEN", "")
+        self.api_version = os.getenv("META_GRAPH_VERSION", "v23.0")
 
     async def validar_webhook(self, request: Request) -> int | None:
         """Meta requiere verificación GET con hub.verify_token."""
@@ -25,7 +25,7 @@ class ProveedorMeta(ProveedorWhatsApp):
         mode = params.get("hub.mode")
         token = params.get("hub.verify_token")
         challenge = params.get("hub.challenge")
-        if mode == "subscribe" and token == self.verify_token:
+        if mode == "subscribe" and self.verify_token and token == self.verify_token:
             logger.info("Webhook de Meta verificado correctamente")
             return int(challenge)
         logger.warning(f"Verificación de webhook fallida — token recibido: {token}")

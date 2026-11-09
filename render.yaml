@@ -1,0 +1,69 @@
+# Blueprint de Render para Sayos CRM.
+# Render → New → Blueprint → elegir el repo mocaagencyar/sayos-crm.
+# Crea el servicio web (Docker) y la base PostgreSQL, y los conecta.
+# Los valores con sync:false se completan a mano en el primer deploy.
+#
+# PLANES: en "free" para la prueba (el servicio se duerme a los 15 min sin
+# uso y la base gratis vence a los 30 días). Para producción con Sayos:
+# web -> starter  y  base -> basic-256mb  (sin cortes y con backups).
+
+databases:
+  - name: sayos-crm-db
+    databaseName: sayos_crm
+    user: sayos
+    region: virginia
+    plan: free
+
+services:
+  - type: web
+    name: sayos-crm
+    runtime: docker
+    region: virginia
+    plan: free
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sayos-crm-db
+          property: connectionString
+      - key: ENVIRONMENT
+        value: production
+      - key: BOT_ENABLED
+        value: "false"
+      - key: WHATSAPP_PROVIDER
+        value: meta
+      - key: META_GRAPH_VERSION
+        value: v23.0
+      - key: META_VERIFY_TOKEN
+        generateValue: true
+      - key: META_APP_ID
+        sync: false
+      - key: META_APP_SECRET
+        sync: false
+      - key: META_EMBEDDED_SIGNUP_CONFIG_ID
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: DASHBOARD_USERNAME
+        sync: false
+      - key: DASHBOARD_PASSWORD
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: BRAND_NAME
+        value: Sayos CRM
+      - key: BRAND_COMPANY
+        value: Sayos
+      - key: BRAND_TAGLINE
+        value: Consultas comerciales de WhatsApp
+      - key: BRAND_SHORT
+        value: SY
+      - key: BRAND_COLOR
+        value: "#B4A26C"
+      - key: BRAND_COLOR_2
+        value: "#D8C99A"
+      - key: BRAND_LOGO_URL
+        sync: false

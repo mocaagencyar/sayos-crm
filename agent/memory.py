@@ -92,7 +92,7 @@ class Canal(Base):
     tipo: Mapped[str] = mapped_column(String(30), default="whatsapp")
     phone_number_id: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     access_token: Mapped[str] = mapped_column(Text)
-    verify_token: Mapped[str] = mapped_column(String(200), default="mcgrowth-webhook-2026")
+    verify_token: Mapped[str] = mapped_column(String(200), default="")
     activo: Mapped[bool] = mapped_column(Boolean, default=True)
     coexistencia: Mapped[bool] = mapped_column(Boolean, default=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
@@ -185,7 +185,7 @@ async def inicializar_db():
             token = os.getenv("META_ACCESS_TOKEN")
             phone_id = os.getenv("META_PHONE_NUMBER_ID")
             if token and phone_id:
-                session.add(Canal(nombre="WhatsApp principal", tipo="whatsapp", phone_number_id=phone_id, access_token=token, verify_token=os.getenv("META_VERIFY_TOKEN", "mcgrowth-webhook-2026"), coexistencia=os.getenv("META_COEXISTENCE", "false").lower() == "true"))
+                session.add(Canal(nombre="WhatsApp principal", tipo="whatsapp", phone_number_id=phone_id, access_token=token, verify_token=os.getenv("META_VERIFY_TOKEN", ""), coexistencia=os.getenv("META_COEXISTENCE", "false").lower() == "true"))
                 await session.commit()
 
 
@@ -415,7 +415,9 @@ async def marcar_lead_descartado(telefono: str) -> bool:
 
 async def cambiar_estado_lead(telefono: str, estado: str) -> bool:
     """Cambia el estado del lead desde el pipeline."""
-    if estado not in {"nuevo", "contactado", "propuesta", "negociacion", "seguimiento", "cerrado", "ganado", "descartado", "perdido"}:
+    # Acepta las etapas base y cualquier etapa creada desde "Personalizar"
+    # (claves alfanuméricas con guion bajo, igual que valida /api/settings).
+    if not estado or len(estado) > 40 or not estado.replace("_", "").isalnum():
         return False
     async with async_session() as session:
         result = await session.execute(select(Lead).where(Lead.telefono == telefono))
@@ -474,14 +476,15 @@ CONFIG_DEFAULTS = {
         "etapas": [
             {"key": "nuevo", "nombre": "Nuevo", "color": "#60a5fa", "activa": True},
             {"key": "contactado", "nombre": "Contactado", "color": "#fbbf24", "activa": True},
-            {"key": "propuesta", "nombre": "Propuesta", "color": "#a78bfa", "activa": True},
-            {"key": "negociacion", "nombre": "Negociación", "color": "#fb923c", "activa": True},
+            {"key": "visita", "nombre": "Visita / medición", "color": "#38bdf8", "activa": True},
+            {"key": "propuesta", "nombre": "Presupuesto enviado", "color": "#a78bfa", "activa": True},
+            {"key": "negociacion", "nombre": "Seguimiento", "color": "#fb923c", "activa": True},
             {"key": "ganado", "nombre": "Ganado", "color": "#4ade80", "activa": True},
             {"key": "perdido", "nombre": "Perdido", "color": "#a1a1aa", "activa": True},
         ],
         "campos": ["rubro", "presupuesto", "interes", "valor_oportunidad", "origen"],
     },
-    "workspace": {"nombre": "MC Growth OS", "descripcion": "Lead intelligence"},
+    "workspace": {"nombre": os.getenv("BRAND_NAME", "CRM"), "descripcion": os.getenv("BRAND_TAGLINE", "")},
 }
 
 

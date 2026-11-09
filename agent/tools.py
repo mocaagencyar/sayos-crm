@@ -133,7 +133,7 @@ def obtener_info_paquetes() -> str:
         tag_str = f" ⭐ {tag}" if tag else ""
         resumen.append(f"*{nombre}{tag_str}*: {setup} + {mensual}")
 
-    return "\n".join(resumen) if resumen else "Consultá en mcgrowthagency.com"
+    return "\n".join(resumen) if resumen else "Consultá con el equipo comercial."
 
 
 def obtener_slots_auditoria() -> list[str]:
