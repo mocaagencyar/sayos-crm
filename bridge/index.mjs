@@ -30,6 +30,7 @@ const initAuthCreds = pick('initAuthCreds')
 const BufferJSON = pick('BufferJSON')
 const proto = pick('proto')
 const fetchLatestBaileysVersion = pick('fetchLatestBaileysVersion')
+const fetchLatestWaWebVersion = pick('fetchLatestWaWebVersion')
 const Browsers = pick('Browsers')
 const makeCacheableSignalKeyStore = pick('makeCacheableSignalKeyStore')
 const generateMessageID = pick('generateMessageIDV2') || pick('generateMessageID')
@@ -41,7 +42,9 @@ const PUERTO_CRM = Number(process.env.PORT || 8000)
 const ENVIO_HABILITADO = (process.env.BRIDGE_ENVIO || 'true').toLowerCase() !== 'false'
 const URL_PUBLICA = (process.env.PUBLIC_BASE_URL || '').replace(/\/$/, '')
 const KEEPALIVE = (process.env.KEEPALIVE || 'true').toLowerCase() !== 'false'
-const NOMBRE_DISPOSITIVO = process.env.BRIDGE_DEVICE_NAME || process.env.BRAND_NAME || 'CRM'
+// WhatsApp valida el navegador declarado: tiene que ser uno real (Chrome,
+// Safari, Firefox, Edge). Un nombre inventado hace fallar la vinculación.
+const NAVEGADOR = process.env.BRIDGE_BROWSER || 'Chrome'
 const logger = pino({ level: process.env.BRIDGE_LOG || 'warn' })
 
 if (!SECRET) {
@@ -118,6 +121,8 @@ let qrDataUrl = ''
 let numero = ''
 let ultimoError = ''
 let conectando = false
+let credsActuales = null
+let codigoVinculacion = ''
 const vistos = new Map() // id → timestamp (evita duplicados)
 const enviadosPorCrm = new Set() // ids de mensajes que mandó el CRM (no reenviarlos)
 const enviosRecientes = [] // {telefono, texto, ts} por si el id no está disponible
@@ -228,8 +233,12 @@ async function conectar() {
   try {
     try { sock?.end?.(undefined) } catch (_) {}
     const { state, guardarCreds } = await sesionPostgres()
+    credsActuales = state.creds
+    // Versión vigente de WhatsApp Web (la de la librería puede estar vieja)
     let version
-    try { ({ version } = await fetchLatestBaileysVersion()) } catch (_) {}
+    try { if (fetchLatestWaWebVersion) ({ version } = await fetchLatestWaWebVersion({})) } catch (_) {}
+    if (!version) { try { ({ version } = await fetchLatestBaileysVersion()) } catch (_) {} }
+    console.log('[bridge] Conectando con WhatsApp Web', version ? version.join('.') : '(versión por defecto)', '· registrado:', !!state.creds.registered)
     sock = makeWASocket({
       ...(version ? { version } : {}),
       auth: {
@@ -237,7 +246,7 @@ async function conectar() {
         keys: makeCacheableSignalKeyStore ? makeCacheableSignalKeyStore(state.keys, logger) : state.keys,
       },
       logger,
-      browser: Browsers?.macOS ? Browsers.macOS(NOMBRE_DISPOSITIVO) : [NOMBRE_DISPOSITIVO, 'Chrome', '1.0'],
+      browser: Browsers?.macOS ? Browsers.macOS(NAVEGADOR) : ['Mac OS', NAVEGADOR, '14.4.1'],
       markOnlineOnConnect: false, // así el teléfono sigue recibiendo notificaciones
       syncFullHistory: false,
       printQRInTerminal: false,
@@ -251,6 +260,7 @@ async function conectar() {
       if (u.connection === 'open') {
         estado = 'conectado'
         qrDataUrl = ''
+        codigoVinculacion = ''
         ultimoError = ''
         numero = soloDigitos(sock.user?.id)
         console.log('[bridge] WhatsApp conectado:', numero)
@@ -258,6 +268,7 @@ async function conectar() {
       if (u.connection === 'close') {
         const codigo = u.lastDisconnect?.error?.output?.statusCode
         ultimoError = u.lastDisconnect?.error?.message || ''
+        console.warn('[bridge] Conexión cerrada · código', codigo, '·', ultimoError)
         if (codigo === DisconnectReason.loggedOut) {
           console.log('[bridge] Sesión cerrada desde el teléfono; espero un QR nuevo.')
           await borrarSesion()
@@ -304,7 +315,7 @@ const servidor = http.createServer(async (req, res) => {
   if (req.headers['x-bridge-secret'] !== SECRET) return responder(res, 401, { error: 'no autorizado' })
   try {
     if (req.method === 'GET' && req.url === '/status') {
-      return responder(res, 200, { estado, qr: qrDataUrl, numero, envio_habilitado: ENVIO_HABILITADO, error: ultimoError })
+      return responder(res, 200, { estado, qr: qrDataUrl, numero, codigo: codigoVinculacion, envio_habilitado: ENVIO_HABILITADO, error: ultimoError })
     }
     if (req.method === 'POST' && req.url === '/send') {
       if (!ENVIO_HABILITADO) return responder(res, 403, { error: 'El envío desde el CRM está deshabilitado (BRIDGE_ENVIO=false)' })
@@ -319,12 +330,26 @@ const servidor = http.createServer(async (req, res) => {
       if (r?.key?.id) enviadosPorCrm.add(r.key.id)
       return responder(res, 200, { ok: true, id: r?.key?.id || messageId || '' })
     }
+    if (req.method === 'POST' && req.url === '/pair') {
+      // Vinculación con número de teléfono: WhatsApp muestra un código de 8
+      // caracteres que se tipea en el teléfono (alternativa al QR).
+      if (!sock || estado === 'conectado' || credsActuales?.registered) return responder(res, 409, { error: 'Ya hay un WhatsApp vinculado' })
+      if (estado !== 'qr') return responder(res, 503, { error: 'Todavía se está preparando la conexión; probá en unos segundos' })
+      const { telefono } = await leerJson(req)
+      const digitos = soloDigitos(telefono)
+      if (digitos.length < 10) return responder(res, 400, { error: 'Ingresá el número completo con código de país (ej. 5491122334455)' })
+      const codigo = await sock.requestPairingCode(digitos)
+      codigoVinculacion = String(codigo || '').replace(/(.{4})(?=.)/, '$1-')
+      console.log('[bridge] Código de vinculación generado para', digitos.slice(0, 4) + '…')
+      return responder(res, 200, { codigo: codigoVinculacion })
+    }
     if (req.method === 'POST' && req.url === '/logout') {
       try { await sock?.logout?.() } catch (_) {}
       await borrarSesion()
       estado = 'desconectado'
       numero = ''
       qrDataUrl = ''
+      codigoVinculacion = ''
       setTimeout(conectar, 1000)
       return responder(res, 200, { ok: true })
     }

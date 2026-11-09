@@ -65,6 +65,14 @@ class ProveedorBridge(ProveedorWhatsApp):
         except Exception as e:
             return {"estado": "apagado", "qr": "", "numero": "", "error": f"El puente no responde: {e}"}
 
+    async def vincular_con_numero(self, telefono: str) -> dict:
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                r = await client.post(f"{self.url}/pair", json={"telefono": telefono}, headers=self._headers())
+            return {"ok": r.status_code == 200, **r.json()}
+        except Exception as e:
+            return {"ok": False, "error": f"El puente no responde: {e}"}
+
     async def desvincular(self) -> bool:
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
