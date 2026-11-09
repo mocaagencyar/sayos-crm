@@ -2,9 +2,10 @@
 # Generado por AgentKit
 
 import os
+import hmac
 import logging
 import httpx
-from fastapi import Request
+from fastapi import Request, HTTPException
 from agent.providers.base import ProveedorWhatsApp, MensajeEntrante
 
 logger = logging.getLogger("agentkit")
@@ -19,6 +20,11 @@ class ProveedorWhapi(ProveedorWhatsApp):
 
     async def parsear_webhook(self, request: Request) -> list[MensajeEntrante]:
         """Parsea el payload de Whapi.cloud y normaliza los mensajes."""
+        # El webhook se configura en Whapi como /webhook?k=<WHAPI_WEBHOOK_SECRET>
+        # para que nadie más pueda cargar mensajes falsos en el CRM.
+        secreto = os.getenv("WHAPI_WEBHOOK_SECRET", "")
+        if secreto and not hmac.compare_digest(request.query_params.get("k", ""), secreto):
+            raise HTTPException(status_code=401, detail="No autorizado")
         body = await request.json()
         mensajes = []
         for msg in body.get("messages", []):

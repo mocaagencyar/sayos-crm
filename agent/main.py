@@ -146,6 +146,24 @@ async def lifespan(app: FastAPI):
     """Inicializa la base de datos al arrancar el servidor."""
     await inicializar_db()
     logger.info("Base de datos inicializada ✓")
+    # Despertador para el plan gratis de Render (se duerme a los 15 min sin
+    # tráfico entrante y dormido pierde tiempo al recibir webhooks). Con el
+    # puente propio lo hace el puente; para los demás proveedores, acá.
+    url_publica = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
+    if url_publica and os.getenv("KEEPALIVE", "true").lower() != "false" and os.getenv("WHATSAPP_PROVIDER", "") != "bridge":
+        import asyncio
+        import httpx
+
+        async def _despertador():
+            while True:
+                await asyncio.sleep(600)
+                try:
+                    async with httpx.AsyncClient(timeout=20.0) as client:
+                        await client.get(f"{url_publica}/health")
+                except Exception:
+                    pass
+
+        asyncio.create_task(_despertador())
     logger.info(f"Agente Max listo en puerto {PORT} ✓")
     logger.info(f"Proveedor WhatsApp: {proveedor.__class__.__name__} ✓")
     yield
