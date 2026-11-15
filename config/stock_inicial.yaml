@@ -1,0 +1,11 @@
+# Stock inicial de heladeras (planilla de Claudio, 9/11/2026).
+# Se carga UNA sola vez, cuando la tabla de stock está vacía. Después el stock
+# se administra desde el CRM (menú Stock) y esto ya no se lee.
+modelos:
+  - {id: V70,  tipo: Vertical,   ancho: 70,  terminaciones: {Negro: 1, A confirmar: 1}}
+  - {id: V90,  tipo: Vertical,   ancho: 90,  terminaciones: {Acero: 1, A confirmar: 2}}
+  - {id: V120, tipo: Vertical,   ancho: 120, terminaciones: {A confirmar: 1}}
+  - {id: V150, tipo: Vertical,   ancho: 150, terminaciones: {A confirmar: 2}}
+  - {id: H120, tipo: Horizontal, ancho: 120, terminaciones: {Dorado: 2, Blanco: 2, Negro: 1}}
+  - {id: H150, tipo: Horizontal, ancho: 150, terminaciones: {A confirmar: 3}}
+  - {id: H200, tipo: Horizontal, ancho: 200, terminaciones: {A confirmar: 1}}

@@ -178,6 +178,8 @@ async def inicializar_db():
             await conn.execute(text("ALTER TABLE leads ADD COLUMN IF NOT EXISTS ultima_actividad TIMESTAMP"))
             await conn.execute(text("UPDATE leads SET ultima_actividad = timestamp WHERE ultima_actividad IS NULL"))
 
+    await sembrar_stock_inicial()
+
     # Se consulta después de cerrar la transacción anterior. En PostgreSQL,
     # otro connection no puede ver la tabla hasta que create_all fue confirmado.
     async with async_session() as session:
@@ -648,3 +650,234 @@ async def limpiar_historial(telefono: str):
         for msg in mensajes:
             await session.delete(msg)
         await session.commit()
+
+
+# ════════════════════════════════════════════════════════════
+# Stock, ventas y consultas de la landing
+# ════════════════════════════════════════════════════════════
+
+class StockItem(Base):
+    """Unidades disponibles por modelo y terminación. Es lo que muestra la landing."""
+    __tablename__ = "stock_items"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    modelo: Mapped[str] = mapped_column(String(20), index=True)      # V70, H120…
+    tipo: Mapped[str] = mapped_column(String(30), default="")        # Vertical / Horizontal
+    ancho: Mapped[int] = mapped_column(Integer, default=0)           # cm
+    terminacion: Mapped[str] = mapped_column(String(60), default="A confirmar")
+    unidades: Mapped[int] = mapped_column(Integer, default=0)        # disponibles hoy
+    orden: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class Venta(Base):
+    """Venta registrada al marcar un lead como ganado."""
+    __tablename__ = "ventas"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    telefono: Mapped[str] = mapped_column(String(50), index=True)
+    cliente: Mapped[str] = mapped_column(String(150), default="")
+    stock_id: Mapped[int] = mapped_column(Integer, default=0)        # 0 = no descuenta stock
+    descripcion: Mapped[str] = mapped_column(String(200), default="")
+    valor: Mapped[str] = mapped_column(String(100), default="")
+    anulada: Mapped[bool] = mapped_column(Boolean, default=False)
+    fecha: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+def _nombre_item(item: "StockItem") -> str:
+    base = f"Heladera {item.tipo.lower()} {item.ancho} cm" if item.tipo and item.ancho else item.modelo
+    return base + (f" · {item.terminacion}" if item.terminacion and item.terminacion != "A confirmar" else "")
+
+
+def _item_dict(i: "StockItem", vendidas: int = 0) -> dict:
+    return {"id": i.id, "modelo": i.modelo, "tipo": i.tipo, "ancho": i.ancho, "terminacion": i.terminacion,
+            "unidades": i.unidades, "vendidas": vendidas, "nombre": _nombre_item(i)}
+
+
+async def sembrar_stock_inicial() -> int:
+    """Carga config/stock_inicial.yaml solo si la tabla de stock está vacía."""
+    import yaml
+    async with async_session() as session:
+        if (await session.execute(select(StockItem))).scalars().first():
+            return 0
+        try:
+            with open("config/stock_inicial.yaml", "r", encoding="utf-8") as f:
+                datos = yaml.safe_load(f) or {}
+        except FileNotFoundError:
+            return 0
+        n = 0
+        for m in datos.get("modelos", []):
+            for term, unidades in (m.get("terminaciones") or {}).items():
+                n += 1
+                session.add(StockItem(modelo=str(m["id"]), tipo=str(m.get("tipo", "")), ancho=int(m.get("ancho", 0)),
+                                      terminacion=str(term), unidades=int(unidades), orden=n))
+        await session.commit()
+        return n
+
+
+async def obtener_stock() -> list[dict]:
+    async with async_session() as session:
+        items = (await session.execute(select(StockItem).order_by(StockItem.orden, StockItem.id))).scalars().all()
+        ventas = (await session.execute(select(Venta).where(Venta.anulada == False))).scalars().all()
+        vendidas: dict[int, int] = {}
+        for v in ventas:
+            vendidas[v.stock_id] = vendidas.get(v.stock_id, 0) + 1
+        return [_item_dict(i, vendidas.get(i.id, 0)) for i in items]
+
+
+async def stock_publico() -> list[dict]:
+    """Stock agrupado por modelo, sin datos internos: es lo que lee la landing."""
+    modelos: dict[str, dict] = {}
+    for i in await obtener_stock():
+        m = modelos.setdefault(i["modelo"], {"id": i["modelo"], "tipo": i["tipo"], "ancho": i["ancho"], "unidades": 0, "terminaciones": []})
+        if i["unidades"] > 0:
+            m["unidades"] += i["unidades"]
+            m["terminaciones"].append([i["terminacion"], i["unidades"]])
+    return list(modelos.values())
+
+
+async def guardar_stock_item(datos: dict, item_id: int | None = None) -> dict | None:
+    """Crea un ítem de stock o actualiza sus unidades / terminación."""
+    async with async_session() as session:
+        if item_id:
+            item = (await session.execute(select(StockItem).where(StockItem.id == item_id))).scalar_one_or_none()
+            if not item:
+                return None
+        else:
+            ultimo = (await session.execute(select(func.max(StockItem.orden)))).scalar() or 0
+            item = StockItem(orden=ultimo + 1, modelo="", tipo="", ancho=0, terminacion="A confirmar", unidades=0)
+            session.add(item)
+        if "modelo" in datos:
+            item.modelo = str(datos["modelo"]).strip().upper()[:20]
+        if "tipo" in datos:
+            item.tipo = str(datos["tipo"]).strip()[:30]
+        if "ancho" in datos:
+            item.ancho = max(0, int(datos["ancho"] or 0))
+        if "terminacion" in datos:
+            item.terminacion = (str(datos["terminacion"]).strip() or "A confirmar")[:60]
+        if "unidades" in datos:
+            item.unidades = max(0, min(9999, int(datos["unidades"] or 0)))
+        await session.commit()
+        return _item_dict(item)
+
+
+async def eliminar_stock_item(item_id: int) -> bool:
+    async with async_session() as session:
+        item = (await session.execute(select(StockItem).where(StockItem.id == item_id))).scalar_one_or_none()
+        if not item:
+            return False
+        await session.delete(item)
+        await session.commit()
+        return True
+
+
+async def registrar_venta(telefono: str, stock_id: int = 0, valor: str = "", descripcion: str = "") -> dict:
+    """
+    Marca el lead como ganado y, si la venta es de una heladera en stock,
+    descuenta una unidad (la landing deja de mostrarla cuando llega a cero).
+    """
+    async with async_session() as session:
+        lead = (await session.execute(select(Lead).where(Lead.telefono == telefono))).scalar_one_or_none()
+        if not lead:
+            return {"ok": False, "error": "Lead no encontrado"}
+        # Una sola venta activa por lead: si ya había una, se reemplaza
+        previas = (await session.execute(select(Venta).where(Venta.telefono == telefono, Venta.anulada == False))).scalars().all()
+        for v in previas:
+            v.anulada = True
+            if v.stock_id:
+                ant = (await session.execute(select(StockItem).where(StockItem.id == v.stock_id))).scalar_one_or_none()
+                if ant:
+                    ant.unidades += 1
+        item = None
+        if stock_id:
+            item = (await session.execute(select(StockItem).where(StockItem.id == stock_id))).scalar_one_or_none()
+            if not item:
+                return {"ok": False, "error": "Ese producto ya no está en el stock"}
+            if item.unidades <= 0:
+                return {"ok": False, "error": "No quedan unidades de ese producto"}
+            item.unidades -= 1
+            descripcion = _nombre_item(item)
+        valor = (valor or "").strip()[:100]
+        session.add(Venta(telefono=telefono, cliente=(lead.nombre or "")[:150], stock_id=item.id if item else 0,
+                          descripcion=(descripcion or "Venta sin descuento de stock").strip()[:200], valor=valor))
+        lead.etapa, lead.cerrado, lead.descartado = "ganado", True, False
+        if valor:
+            lead.valor_oportunidad = valor
+        await session.commit()
+        return {"ok": True, "descripcion": descripcion, "quedan": item.unidades if item else None}
+
+
+async def anular_venta_de_lead(telefono: str) -> int:
+    """Si el lead deja de estar ganado, la venta se anula y la unidad vuelve al stock."""
+    async with async_session() as session:
+        ventas = (await session.execute(select(Venta).where(Venta.telefono == telefono, Venta.anulada == False))).scalars().all()
+        for v in ventas:
+            v.anulada = True
+            if v.stock_id:
+                item = (await session.execute(select(StockItem).where(StockItem.id == v.stock_id))).scalar_one_or_none()
+                if item:
+                    item.unidades += 1
+        await session.commit()
+        return len(ventas)
+
+
+async def obtener_ventas() -> list[dict]:
+    async with async_session() as session:
+        ventas = (await session.execute(select(Venta).where(Venta.anulada == False).order_by(Venta.fecha.desc()))).scalars().all()
+        return [{"id": v.id, "telefono": v.telefono, "cliente": v.cliente, "descripcion": v.descripcion,
+                 "valor": v.valor, "stock_id": v.stock_id, "fecha": v.fecha.isoformat()} for v in ventas]
+
+
+async def registrar_consulta_web(telefono: str, nombre: str, rubro: str, interes: str, resumen: str, origen: str, mensaje: str) -> bool:
+    """
+    Registra (o actualiza) una consulta que llegó desde la landing.
+    Devuelve True si el lead es nuevo.
+    """
+    ahora = datetime.utcnow()
+    async with async_session() as session:
+        lead = (await session.execute(select(Lead).where(Lead.telefono == telefono))).scalar_one_or_none()
+        nuevo = lead is None
+        if nuevo:
+            lead = Lead(telefono=telefono, etapa="nuevo", cerrado=False, descartado=False, timestamp=ahora)
+            session.add(lead)
+            lead.nombre, lead.rubro, lead.origen, lead.resumen = nombre[:100], rubro[:100], origen[:100], resumen
+        lead.interes = interes
+        lead.ultima_actividad = ahora
+        lead.no_leido = True
+        session.add(Mensaje(telefono=telefono, role="user", content=mensaje, fuente="user", timestamp=ahora))
+        await session.commit()
+        return nuevo
+
+
+async def cambiar_telefono_lead(actual: str, nuevo: str) -> dict:
+    """
+    Asigna el WhatsApp real a un lead (p. ej. uno que entró por la landing sin
+    teléfono). Si ya existe un lead con ese número, se fusionan.
+    """
+    async with async_session() as session:
+        lead = (await session.execute(select(Lead).where(Lead.telefono == actual))).scalar_one_or_none()
+        if not lead:
+            return {"ok": False, "error": "Lead no encontrado"}
+        if actual == nuevo:
+            return {"ok": True, "telefono": nuevo}
+        otro = (await session.execute(select(Lead).where(Lead.telefono == nuevo))).scalar_one_or_none()
+        for tabla in (Mensaje, Venta):
+            for fila in (await session.execute(select(tabla).where(tabla.telefono == actual))).scalars().all():
+                fila.telefono = nuevo
+        control = (await session.execute(select(ControlContacto).where(ControlContacto.telefono == actual))).scalar_one_or_none()
+        if control:
+            await session.delete(control)
+        if otro:
+            # Fusión: el lead con WhatsApp real conserva su etapa; se completan los datos vacíos
+            for campo in ("nombre", "rubro", "presupuesto", "interes"):
+                if getattr(otro, campo) in ("", "No indicó", None):
+                    setattr(otro, campo, getattr(lead, campo))
+            if otro.resumen in ("", "No disponible", None):
+                otro.resumen = lead.resumen
+            if otro.origen in ("", "WhatsApp", None):
+                otro.origen = lead.origen
+            otro.timestamp = min(otro.timestamp, lead.timestamp)
+            await session.delete(lead)
+        else:
+            lead.telefono = nuevo
+        await session.commit()
+        return {"ok": True, "telefono": nuevo, "fusionado": bool(otro)}
