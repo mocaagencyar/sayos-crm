@@ -748,6 +748,23 @@ async def public_preflight(resto: str, request: Request):
     return PlainTextResponse("", status_code=204, headers=_cors(request))
 
 
+@app.get("/landing/sayos-crm.js")
+async def landing_connector(request: Request):
+    """
+    Script que conecta la landing con el CRM. La landing lo incrusta con
+    una sola línea; así el conector se corrige desde acá, sin volver a
+    publicar la landing.
+    """
+    ruta = "static/sayos-crm.js"
+    if not os.path.exists(ruta):
+        raise HTTPException(status_code=404, detail="Conector no encontrado")
+    return FileResponse(
+        ruta,
+        media_type="application/javascript; charset=utf-8",
+        headers={**_cors(request), "Cache-Control": "public, max-age=300"},
+    )
+
+
 @app.get("/api/public/stock")
 async def public_stock(request: Request):
     """Stock disponible por modelo. Lo lee la landing para mostrar solo lo que queda."""
