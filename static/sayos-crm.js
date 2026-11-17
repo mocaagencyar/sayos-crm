@@ -27,8 +27,63 @@
   var CRM = "https://sayos-crm.onrender.com";
   var CAMPANIA = "Black Sayos";
 
+  // Medición. Se inyecta desde acá para no tocar el código de la landing.
+  var GTM = ["GTM-N3QKFSHC"];        // contenedores de Google Tag Manager
+  var META_PIXEL = "3701207983381610";
+  // La copia de pruebas no mide: ensuciaría los datos de la campaña.
+  var MIDE = !/\.pages\.dev$/i.test(location.hostname);
+
   var ultimoModelo = "";   // modelo de la tarjeta en la que se hizo clic
   var yaEnviado = {};      // evita mandar dos veces la misma consulta
+
+  /* ---------- 0. Medición (GTM + píxel de Meta) ---------- */
+  function cargarScript(src) {
+    var t = document.createElement("script");
+    t.async = true; t.src = src;
+    document.head.appendChild(t);
+  }
+
+  function cargarTracking() {
+    if (!MIDE) return;
+    window.dataLayer = window.dataLayer || [];
+
+    GTM.forEach(function (id) {
+      if (!id) return;
+      // Si la landing ya trae el contenedor, no lo duplicamos
+      if (document.querySelector('script[src*="' + id + '"]')) return;
+      window.dataLayer.push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+      cargarScript("https://www.googletagmanager.com/gtm.js?id=" + id);
+    });
+
+    if (META_PIXEL && !window.fbq) {
+      var n = window.fbq = function () {
+        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+      };
+      if (!window._fbq) window._fbq = n;
+      n.push = n; n.loaded = true; n.version = "2.0"; n.queue = [];
+      cargarScript("https://connect.facebook.net/en_US/fbevents.js");
+      window.fbq("init", META_PIXEL);
+      window.fbq("track", "PageView");
+    }
+  }
+
+  // Avisa a Meta que esta consulta es un lead, en el mismo momento en que
+  // se registra en el CRM. Sin esto, Meta no puede optimizar la campaña.
+  function avisarLead(datos) {
+    if (!MIDE) return;
+    try {
+      if (window.fbq) window.fbq("track", "Lead", {
+        content_name: datos.producto || "Consulta general",
+        content_category: datos.rubro || "",
+        source: CAMPANIA
+      });
+      if (window.dataLayer) window.dataLayer.push({
+        event: "crm_lead_registrado",
+        modelo: datos.modelo || "",
+        rubro: datos.rubro || ""
+      });
+    } catch (_) {}
+  }
 
   /* ---------- helpers ---------- */
   function texto(sel) {
@@ -96,6 +151,8 @@
       web: valor(form, "web"),
       mensaje: "Consulta desde la landing" + (producto ? ": " + producto : "")
     });
+
+    avisarLead({ producto: producto, rubro: rubro, modelo: ultimoModelo });
 
     var url = CRM + "/api/public/lead";
     try {
@@ -200,6 +257,7 @@
 
   /* ---------- arranque ---------- */
   function iniciar() {
+    cargarTracking();
     var campo = document.querySelector("[name=nombre]");
     ponerTrampa(campo ? campo.form : document.querySelector("#form"));
     leerStock();
