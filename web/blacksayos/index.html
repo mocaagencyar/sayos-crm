@@ -675,6 +675,30 @@ function render(filter){
   document.getElementById("stock-total").textContent = total ? total + (total===1?" unidad en stock":" unidades en stock") : "Stock agotado";
 }
 render("todas");
+
+/* Stock real desde el CRM: pisa las unidades por terminación y vuelve a dibujar.
+   Una heladera vendida desaparece como opción: su color queda "Agotado" y
+   deshabilitado, y si se agota el modelo entero la tarjeta queda agotada.
+   Si el CRM no responde, la landing se queda con su stock propio. */
+window.SAYOS_STOCK_PROPIO = true;
+(function(){
+  fetch("https://sayos-crm.onrender.com/api/public/stock", {cache:"no-store"})
+    .then(r => r.ok ? r.json() : null)
+    .then(d => {
+      if(!d || !Array.isArray(d.modelos) || !d.modelos.length) return;
+      const crm = {};
+      d.modelos.forEach(m => { crm[m.id] = m; });
+      STOCK.forEach(m => {
+        const c = crm[m.id];
+        if(!c){ m.terminaciones = m.terminaciones.map(t => [t[0], 0]); return; }
+        const u = {};
+        (c.terminaciones || []).forEach(t => { u[t[0]] = Number(t[1]) || 0; });
+        m.terminaciones = m.terminaciones.map(t => [t[0], u[t[0]] || 0]);
+      });
+      render();
+    })
+    .catch(()=>{});
+})();
 /* Cambiar foto según la terminación (clic, toque o mouse encima) */
 function pickFinish(btn, keep){
   const m = STOCK.find(x=>x.id===btn.dataset.m); if(!m||!m.fotos) return;

@@ -189,6 +189,9 @@
   }
 
   function leerStock() {
+    // Si la landing ya sincroniza su propio stock contra el CRM, no nos
+    // metemos: ella sabe manejar colores agotados y tarjetas agotadas.
+    if (window.SAYOS_STOCK_PROPIO) return;
     fetch(CRM + "/api/public/stock", { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) { if (d && d.modelos) aplicarStock(d.modelos); })
