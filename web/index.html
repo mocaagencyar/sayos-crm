@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Black Sayos · Heladeras en stock</title>
+<meta name="description" content="Black Sayos: heladeras exhibidoras en stock con 15% OFF o cuotas sin interés, del 20 de noviembre al 15 de diciembre. Entrega inmediata en AMBA.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap">
+<style>
+@font-face{font-family:"Roulen Atelier";src:url("fonts/roulen-atelier-italic.woff2") format("woff2");font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:"Roulen Atelier";src:url("fonts/roulen-atelier.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+:root{
+  --bg:#111110;
+  --bg-2:#181816;
+  --card:#1D1D1B;
+  --line:#2E2D2A;
+  --ink:#F3F2EF;
+  --muted:#B9B5AC;
+  --gold:#B4A26C;
+  --gold-2:#D8C99A;
+  --wa:#1E7A4C;
+  --f-sans:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-serif:"Roulen Atelier",Georgia,serif;
+  --max:1240px;
+  --r:14px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-sans);font-size:18px;line-height:1.6;font-weight:400;-webkit-font-smoothing:antialiased;overflow-x:clip}
+img{max-width:100%;display:block}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--gold-2);outline-offset:3px}
+.wrap{max-width:var(--max);margin:0 auto;padding-inline:20px}
+h1,h2,h3{margin:0;font-weight:500;letter-spacing:-.02em;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+em{font-family:var(--f-serif);font-style:italic;font-weight:400;color:var(--gold-2);letter-spacing:0;font-size:1.06em}
+.eyebrow{font-size:15px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+
+/* Botones grandes: público +50 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:60px;padding:16px 30px;border-radius:8px;border:1.5px solid var(--gold);background:var(--gold);color:#141412;font:inherit;font-size:19px;font-weight:600;text-decoration:none;cursor:pointer;transition:background .25s,color .25s,border-color .25s}
+.btn:hover{background:var(--gold-2);border-color:var(--gold-2)}
+.btn.line{background:transparent;color:var(--gold-2)}
+.btn.line:hover{background:var(--gold);color:#141412}
+.btn.wa{background:var(--wa);border-color:var(--wa);color:#fff}
+.btn.wa:hover{background:#25925c;border-color:#25925c}
+.btn svg{width:22px;height:22px;flex:none}
+
+/* Header */
+header{position:sticky;top:0;z-index:40;background:rgba(17,17,16,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:78px;gap:20px}
+.logo img{height:46px;width:auto}
+nav{display:flex;align-items:center;gap:28px;font-size:18px;font-weight:500}
+nav a{text-decoration:none}
+nav a:hover{color:var(--gold-2)}
+nav .sep{width:1px;height:26px;background:var(--gold);opacity:.7}
+@media (max-width:620px){nav .hide-m{display:none}nav .sep{display:none}}
+
+/* Hero */
+.hero{position:relative;display:grid;grid-template-columns:47% 1fr;min-height:min(100svh,920px);overflow:hidden;background:#fff}
+.hero-copy{position:relative;z-index:2;background:#121210;box-shadow:10px 0 28px rgba(0,0,0,.28);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:clamp(48px,7vw,100px) clamp(24px,4vw,80px) clamp(48px,7vw,100px) clamp(24px,11vw,180px)}
+.hero-logo{height:clamp(70px,7.2vw,132px);width:auto;margin-bottom:clamp(14px,1.4vw,24px)}
+.date-tag{display:inline-block;background:#D90E14;color:#fff;font-family:"Montserrat",var(--f-sans);font-weight:700;font-size:clamp(17px,1.45vw,26px);letter-spacing:.01em;padding:.42em .85em;line-height:1;margin-bottom:clamp(22px,2.6vw,46px)}
+.hero h1{font-family:"Montserrat",var(--f-sans);font-weight:800;text-transform:uppercase;color:#fff;font-size:clamp(46px,4.6vw,88px);line-height:.98;letter-spacing:-.005em;margin-bottom:clamp(24px,2.6vw,46px)}
+.hero .lede{font-family:"Montserrat",var(--f-sans);font-weight:600;color:#fff;font-size:clamp(20px,1.85vw,32px);line-height:1.22;max-width:24ch;margin:0 0 clamp(30px,3.6vw,64px) .1em}
+.hero .btn{min-height:clamp(60px,4.4vw,76px);padding-inline:clamp(28px,2.4vw,46px);font-size:clamp(19px,1.35vw,23px)}
+.hero-media{position:relative;background:#0c0c0b;overflow:hidden}
+.hero-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ribbon{position:absolute;z-index:3;top:0;right:0;width:clamp(260px,30vw,560px);height:clamp(260px,30vw,560px);overflow:hidden;pointer-events:none}
+.ribbon span{position:absolute;top:30%;left:-12%;width:150%;transform:rotate(41deg);display:flex;align-items:center;justify-content:center;gap:.35em;padding:.55em 0;background:linear-gradient(90deg,#3a3a38 0%,#000 22%,#000 72%,#3a3a38 100%);box-shadow:0 6px 18px rgba(0,0,0,.35);font-family:"Montserrat",var(--f-sans);font-weight:800;font-size:clamp(20px,2.3vw,44px);letter-spacing:.06em;color:var(--gold-2);line-height:1}
+.ribbon img{height:1.35em;width:auto}
+@media (max-width:860px){
+  .hero{grid-template-columns:minmax(0,1fr);min-height:0}
+  .hero-media{order:-1;aspect-ratio:16/10}
+  .hero-copy{box-shadow:0 -10px 24px rgba(0,0,0,.25);padding:44px 24px 52px}
+  .ribbon{width:min(62vw,300px);height:min(62vw,300px)}
+  .ribbon span{font-size:clamp(18px,5vw,24px)}
+}
+
+/* Portada: neón + glitch en el título y latido en la etiqueta, ciclo de 4 s */
+.hero h1.fx{position:relative;animation:neon 4s infinite}
+.hero h1.fx::before,.hero h1.fx::after{content:attr(data-text);position:absolute;inset:0;pointer-events:none;opacity:0}
+.hero h1.fx::before{color:#D90E14;animation:glitchA 4s infinite}
+.hero h1.fx::after{color:var(--gold-2);animation:glitchB 4s infinite}
+@keyframes neon{
+  0%,100%{text-shadow:0 0 6px rgba(255,255,255,.35),0 0 18px rgba(216,201,154,.35),0 0 38px rgba(180,162,108,.25)}
+  4%{text-shadow:none;opacity:.55}
+  6%{text-shadow:0 0 8px rgba(255,255,255,.5),0 0 24px rgba(216,201,154,.5);opacity:1}
+  8%{opacity:.7;text-shadow:none}
+  10%{opacity:1}
+  50%{text-shadow:0 0 10px rgba(255,255,255,.55),0 0 30px rgba(216,201,154,.55),0 0 60px rgba(180,162,108,.4)}
+  86%{transform:none}
+  88%{transform:translateX(-2px) skewX(-4deg)}
+  90%{transform:translateX(3px)}
+  92%{transform:none}
+}
+@keyframes glitchA{
+  0%,86%,94%,100%{opacity:0;transform:none;clip-path:inset(0 0 0 0)}
+  87%{opacity:.9;transform:translate(-5px,2px);clip-path:inset(10% 0 62% 0)}
+  89%{opacity:.9;transform:translate(6px,-1px);clip-path:inset(55% 0 20% 0)}
+  91%{opacity:.8;transform:translate(-3px,0);clip-path:inset(30% 0 45% 0)}
+  93%{opacity:.6;transform:translate(2px,1px);clip-path:inset(80% 0 4% 0)}
+}
+@keyframes glitchB{
+  0%,86%,94%,100%{opacity:0;transform:none;clip-path:inset(0 0 0 0)}
+  87%{opacity:.85;transform:translate(5px,-2px);clip-path:inset(60% 0 10% 0)}
+  89%{opacity:.85;transform:translate(-6px,1px);clip-path:inset(15% 0 60% 0)}
+  91%{opacity:.7;transform:translate(4px,0);clip-path:inset(40% 0 35% 0)}
+  93%{opacity:.5;transform:translate(-2px,0);clip-path:inset(2% 0 85% 0)}
+}
+.fx-beat{animation:beat 4s infinite;transform-origin:left center}
+@keyframes beat{
+  0%,30%,100%{transform:scale(1);box-shadow:0 0 0 rgba(217,14,20,0)}
+  8%{transform:scale(1.08);box-shadow:0 0 22px rgba(217,14,20,.75)}
+  15%{transform:scale(1)}
+  22%{transform:scale(1.06);box-shadow:0 0 16px rgba(217,14,20,.6)}
+}
+@media (prefers-reduced-motion:reduce){.hero h1.fx,.hero h1.fx::before,.hero h1.fx::after,.fx-beat{animation:none}}
+
+/* Cinta infinita de formas de pago */
+.paybar{background:var(--gold);color:#141412;overflow:hidden;border-block:1px solid #9E8B55}
+.paybar .track{display:flex;width:max-content;animation:marquee 30s linear infinite}
+.paybar .grp{display:flex;align-items:center;flex:none}
+.paybar .it{display:inline-flex;align-items:center;gap:14px;padding:20px 34px;font-family:"Montserrat",var(--f-sans);font-weight:800;font-size:clamp(17px,1.5vw,22px);letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
+.paybar .it svg{width:32px;height:32px;flex:none}
+.paybar .sep{width:8px;height:8px;background:#141412;transform:rotate(45deg);flex:none}
+@media (prefers-reduced-motion:reduce){.paybar .track{animation-duration:90s}}
+/* Cuenta regresiva */
+.countdown{display:flex;flex-direction:column;gap:10px}
+.countdown .label{font-size:16px;color:var(--muted)}
+.cd{display:flex;gap:10px}
+.cd div{min-width:78px;padding:10px 8px;border:1px solid var(--line);border-radius:10px;text-align:center;background:var(--bg-2)}
+.cd strong{display:block;font-size:30px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--gold-2)}
+.cd span{font-size:14px;color:var(--muted)}
+
+/* Beneficios */
+.perks{border-bottom:1px solid var(--line)}
+.perks ul{list-style:none;margin:0 auto;padding:34px 24px;display:grid;grid-template-columns:repeat(5,auto);justify-content:space-between;gap:24px 28px;max-width:1440px}
+.perks li{display:flex;gap:16px;align-items:flex-start}
+.perks svg{width:34px;height:34px;flex:none;color:var(--gold)}
+.perks strong{display:block;font-size:19px;font-weight:600}
+.perks .nac{white-space:nowrap}
+.perks strong{white-space:nowrap}
+.perks .flag{width:24px;height:16px;border-radius:2px;box-shadow:0 0 0 1px rgba(255,255,255,.25);vertical-align:-2px;margin-left:6px;display:inline-block}
+.perks span{font-size:17px;color:var(--muted);line-height:1.4}
+@media (max-width:1340px){.perks ul{grid-template-columns:repeat(3,1fr);justify-content:stretch;max-width:1100px}}
+@media (max-width:900px){.perks ul{grid-template-columns:1fr 1fr;justify-content:stretch}.perks strong{white-space:normal}}
+@media (max-width:520px){.perks ul{grid-template-columns:1fr}}
+
+/* Catálogo */
+section{padding-block:clamp(64px,8vw,110px)}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:34px}
+.sec-head h2{font-size:clamp(34px,4.2vw,54px);line-height:1.05}
+.sec-head p{color:var(--muted);max-width:46ch;margin-top:12px}
+.display{font-family:"Montserrat",var(--f-sans);font-weight:800;text-transform:uppercase;letter-spacing:-.005em;line-height:1;color:#fff}
+.stock-tag{color:var(--gold-2);font-size:19px;font-weight:500;white-space:nowrap}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:30px}
+.filters button{min-height:52px;padding:10px 24px;border-radius:40px;border:1.5px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:18px;font-weight:500;cursor:pointer}
+.filters button[aria-pressed="true"]{border-color:var(--gold);background:var(--gold);color:#141412}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+@media (max-width:1140px){.grid{grid-template-columns:1fr 1fr}}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.card .ph{position:relative;aspect-ratio:4/4.2;background:#0d0d0c;overflow:hidden}
+.card .ph.empty{background:linear-gradient(160deg,#1f1f1d,#121211);border-bottom:1px solid var(--line)}
+.card .ph img{width:100%;height:100%;object-fit:cover;transition:transform .8s ease}
+.card:hover .ph img{transform:scale(1.03)}
+.badge{position:absolute;top:14px;left:14px;padding:7px 14px;border-radius:30px;background:var(--gold);color:#141412;font-size:15px;font-weight:700;letter-spacing:.04em}
+.badge.last{background:#C9493A;color:#fff}
+.card .body{padding:24px 24px 26px;display:flex;flex-direction:column;gap:16px;flex:1}
+.card h3{font-size:26px;line-height:1.15}
+.card h3 small{display:block;font-size:16px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.card-title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.off small{font-size:.62em;font-weight:700;letter-spacing:.04em;vertical-align:.15em;margin-right:1px}
+.off{flex:none;background:#D90E14;color:#fff;font-family:"Montserrat",var(--f-sans);font-weight:800;font-size:20px;line-height:1;padding:9px 12px;letter-spacing:.01em}
+.specs{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:17px;color:var(--muted)}
+.specs li{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.specs li b{font-weight:500;color:var(--ink);text-align:right}
+.specs li{font-size:16px;line-height:1.35}
+.meta{font-size:17px;color:var(--muted);margin-top:-4px}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tags span{font-size:15px;line-height:1.2;padding:7px 11px;border-radius:6px;background:rgba(180,162,108,.12);color:var(--gold-2);border:1px solid rgba(180,162,108,.28)}
+.finishes{padding-top:4px;border-top:1px solid var(--line);padding-top:14px}
+/* Todas incluyen */
+.incl{margin-top:34px;padding:34px 30px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.incl h3{font-family:"Montserrat",var(--f-sans);font-weight:800;text-transform:uppercase;font-size:22px;text-align:center;margin-bottom:26px}
+.incl ul{list-style:none;margin:0 auto;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:28px 22px;max-width:1000px}
+.incl li{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;font-size:16px;line-height:1.35;color:var(--ink)}
+.incl li span{color:var(--muted);font-size:15px}
+.incl svg{width:38px;height:38px;color:var(--gold)}
+
+@media (max-width:760px){.incl ul{grid-template-columns:1fr 1fr}.incl{padding:26px 18px}}
+.finishes{display:flex;flex-wrap:wrap;gap:8px}
+.finish{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:30px;font-size:16px}
+.finish.sw{background:transparent;color:var(--ink);font:inherit;font-size:16px;cursor:pointer;min-height:44px;transition:border-color .2s,background .2s}
+.finish.sw:hover{border-color:var(--gold)}
+.finish.sw[aria-pressed="true"]{border-color:var(--gold);background:rgba(180,162,108,.16);box-shadow:inset 0 0 0 1px var(--gold)}
+.card .ph img{transition:transform .8s ease,opacity .25s ease}
+.finish i{width:16px;height:16px;border-radius:50%;border:1px solid rgba(255,255,255,.35)}
+.price{display:flex;flex-direction:column;gap:2px}
+.price s{color:var(--muted);font-size:17px}
+.price strong{font-size:26px;font-weight:600;color:var(--gold-2)}
+.price span{font-size:17px;color:var(--muted)}
+.card .btn{margin-top:auto;width:100%;text-transform:uppercase;letter-spacing:.02em;font-size:clamp(15px,4.6vw,17px);white-space:nowrap;padding-inline:14px;gap:10px}
+@media (max-width:360px){.card .btn{white-space:normal}}
+.note{margin-top:22px;font-size:16px;color:var(--muted)}
+
+/* Por qué */
+.why{background:var(--bg-2);border-block:1px solid var(--line)}
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:40px}
+.why-grid article{padding:26px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.why-grid .ico{width:44px;height:44px;color:var(--gold)}
+.why-grid h3{font-size:22px;margin:12px 0 10px}
+.why-grid p{color:var(--muted);font-size:17px;line-height:1.5}
+@media (max-width:960px){.why-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.why-grid{grid-template-columns:1fr}}
+
+/* Clientes */
+.clients{padding-block:56px;border-bottom:1px solid var(--line);overflow:hidden}
+.marquee{display:flex;width:max-content;animation:marquee 38s linear infinite}
+.marquee:hover{animation-play-state:paused}
+.logos{display:flex;align-items:center;gap:72px;padding-right:72px;flex:none}
+.logos img{height:72px;width:auto;max-width:180px;object-fit:contain;filter:invert(1) brightness(.85);opacity:.9}
+.logos img.sm{height:44px}
+.clients{-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+@keyframes marquee{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.marquee{animation-duration:120s}}
+@media (max-width:640px){.logos{gap:44px;padding-right:44px}.logos img{height:56px}}
+
+/* Cómo comprar */
+.steps{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:34px;margin:48px 0 0;padding:0;counter-reset:s}
+.steps::before{content:"";position:absolute;left:calc(16.66% - 0px);right:calc(16.66% - 0px);top:27px;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold-2),var(--gold))}
+.steps li{list-style:none;position:relative;display:flex;flex-direction:column;align-items:center;text-align:center}
+.steps .dot{position:relative;z-index:1;width:56px;height:56px;border-radius:50%;background:var(--bg);border:2px solid var(--gold);display:grid;place-items:center;font-family:"Montserrat",var(--f-sans);font-weight:800;font-size:22px;color:var(--gold-2);margin-bottom:26px}
+.steps .step-card{position:relative;width:100%;flex:1;padding:30px 28px 32px;border-radius:var(--r);background:linear-gradient(145deg,#C9B77F,#B4A26C 55%,#9E8B55);color:#141412;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.steps .step-card::before{content:"";position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(45deg);width:18px;height:18px;background:#C3B07A;border-radius:3px}
+.steps .when{display:block;font-size:14px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#3a3220;margin-bottom:10px}
+.steps h3{font-family:"Montserrat",var(--f-sans);font-weight:800;text-transform:uppercase;font-size:22px;line-height:1.15;margin-bottom:12px;color:#141412}
+.steps p{color:#2a2518;font-size:18px;line-height:1.45;margin:0 auto;max-width:30ch}
+@media (max-width:820px){
+  .steps{grid-template-columns:1fr;gap:26px;padding-left:72px}
+  .steps::before{display:none}
+  .steps li:not(:last-child)::after{content:"";position:absolute;left:-45px;top:56px;bottom:-26px;width:2px;background:var(--gold)}
+  .steps li{align-items:stretch;text-align:left}
+  .steps .dot{position:absolute;left:-72px;top:0;margin:0}
+  .steps .step-card::before{top:20px;left:-9px;transform:rotate(45deg)}
+  .steps p{margin:0}
+}
+
+/* Cierre */
+.final{border-top:1px solid var(--line)}
+.final .wrap{display:flex;flex-direction:column;align-items:center;text-align:center;gap:36px}
+.final p{margin-inline:auto}
+.final h2{font-size:clamp(32px,3.8vw,48px)}
+.final p{color:var(--muted);margin-top:10px}
+.final .btn{min-height:84px;padding:20px 44px;font-size:23px;gap:14px;border-radius:10px}
+.final .btn svg{width:30px;height:30px}
+@media (max-width:640px){.final .btn{width:100%;min-height:76px;font-size:21px}}
+footer{border-top:1px solid var(--line);padding:40px 0 120px;font-size:16px;color:var(--muted)}
+footer .wrap{display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px}
+footer img{height:40px;width:auto}
+footer .legal{font-size:15px;line-height:1.5;border-top:1px solid var(--line);padding-top:20px;max-width:900px;width:100%}
+
+/* WhatsApp flotante */
+.wa-float{position:fixed;right:22px;bottom:22px;z-index:50;display:inline-flex;align-items:center;gap:10px;height:64px;padding:0 26px;border-radius:40px;background:var(--wa);color:#fff;text-decoration:none;font-size:19px;font-weight:600;box-shadow:0 8px 28px rgba(0,0,0,.45)}
+.wa-float svg{width:28px;height:28px}
+.wa-float{transition:opacity .35s,transform .35s}
+.wa-float.off{opacity:0;transform:translateY(20px);pointer-events:none;visibility:hidden;transition:opacity .35s,transform .35s,visibility 0s .35s}
+@media (max-width:640px){.wa-float{width:68px;height:68px;padding:0;justify-content:center}.wa-float span{display:none}.wa-float svg{width:34px;height:34px}}
+
+/* Modal de reserva */
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--bg-2);color:var(--ink);padding:0;width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 24px)}
+dialog::backdrop{background:rgba(0,0,0,.72)}
+.dlg{padding:30px 28px 28px;display:flex;flex-direction:column;gap:18px}
+.dlg-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.dlg h2{font-size:28px;line-height:1.15}
+.dlg .sub{color:var(--gold-2);font-weight:500}
+.x{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:26px;cursor:pointer;flex:none}
+label{display:flex;flex-direction:column;gap:8px;font-size:17px;font-weight:500}
+input,select{width:100%;min-width:0;box-sizing:border-box;min-height:56px;padding:12px 16px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:18px}
+input:focus,select:focus{border-color:var(--gold);outline:none}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.row2 label{min-width:0}
+#wa-go{white-space:nowrap}
+@media (max-width:520px){.row2{grid-template-columns:1fr}}
+.dlg small{color:var(--muted);font-size:15px;line-height:1.45}
+.preview{border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:14px 16px}
+.preview-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.preview-top span{font-size:14px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.preview-top button{min-height:40px;padding:6px 16px;border-radius:30px;border:1px solid var(--gold);background:transparent;color:var(--gold-2);font:inherit;font-size:15px;cursor:pointer}
+.preview p{font-size:16px;line-height:1.45;color:var(--ink);margin:0}
+.err{color:#E58C7E;font-size:16px}
+
+/* ===== Celular (aprobado desktop 16/11; ajustes solo mobile) ===== */
+.more{display:none}
+.hero-photo{display:none}
+.detail-dlg{padding:0;border:0;background:transparent;width:min(460px,calc(100vw - 20px));max-height:calc(100dvh - 20px);overflow:auto;border-radius:var(--r)}
+.detail-dlg::backdrop{background:rgba(0,0,0,.8)}
+.detail-dlg .card{border-radius:var(--r)}
+.detail .more{display:none!important}
+.detail-x{position:absolute;top:10px;right:10px;z-index:5;background:rgba(17,17,16,.85)!important}
+@media (max-width:860px){
+  .hero-media{order:1;aspect-ratio:5/4}
+  .hero-media video{display:none}
+  .hero-photo{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero-copy{align-items:center;text-align:center;padding:40px 22px 44px;box-shadow:none}
+  .hero-logo{order:0;height:64px;margin-bottom:22px}
+  .hero h1{order:1;margin-bottom:18px}
+  .date-tag{order:2;margin-bottom:18px;transform-origin:center}
+  .hero .lede{order:3;margin:0 auto 26px;max-width:22ch}
+  .hero .btn{order:4}
+  .fx-beat{transform-origin:center}
+}
+@media (max-width:760px){
+  .paybar .it{padding:9px 16px;font-size:13px;gap:8px;letter-spacing:.01em}
+  .paybar .it svg{width:18px;height:18px}
+  .paybar .sep{width:5px;height:5px}
+  .perks ul{grid-template-columns:1fr 1fr;gap:22px 14px;padding:26px 16px}
+  .perks li{flex-direction:column;align-items:center;text-align:center;gap:8px}
+  .perks li:last-child{grid-column:1/-1;justify-self:center;max-width:62%}
+  .perks svg{width:30px;height:30px}
+  .perks strong{white-space:normal;font-size:16px;line-height:1.25}
+  .perks span{font-size:14px}
+  .perks .nac{white-space:normal}
+  .sec-head{flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;margin-bottom:22px}
+  .sec-head p{margin-inline:auto}
+  .filters{justify-content:center;gap:8px;margin-bottom:22px}
+  .filters button{min-height:44px;padding:8px 16px;font-size:16px}
+  .grid{grid-template-columns:1fr 1fr;gap:12px}
+  .grid .card{cursor:pointer}
+  .card .ph{aspect-ratio:1/1}
+  .badge{font-size:12px;padding:4px 9px;top:8px;left:8px}
+  .card .body{padding:12px 10px 14px;gap:6px;align-items:center;text-align:center}
+  .card-title{flex-direction:column;align-items:center;gap:6px}
+  .card h3{font-size:17px;line-height:1.2}
+  .card h3 small{font-size:12px;letter-spacing:.12em;margin-bottom:2px}
+  .off{font-size:14px;padding:5px 8px}
+  .grid .meta,.grid .tags,.grid .finishes,.grid .price,.grid .btn{display:none}
+  .grid .more{display:block;font-size:14px;color:var(--gold-2);margin-top:2px}
+  .detail .body{padding:20px 18px 22px;gap:14px}
+  .detail .card-title{flex-direction:row;justify-content:center;gap:12px}
+  .detail h3{font-size:22px}
+  .detail .tags,.detail .finishes{justify-content:center}
+  .detail .btn{white-space:nowrap}
+  .why-grid{grid-template-columns:1fr 1fr;gap:12px;margin-top:26px}
+  .why-grid article{padding:20px 12px;display:flex;flex-direction:column;align-items:center;text-align:center}
+  .why-grid p{display:none}
+  .why-grid h3{font-size:17px;line-height:1.25;margin:10px 0 0}
+  .why-grid .ico{width:36px;height:36px}
+  .incl{margin-top:22px}
+  .incl h3{font-size:18px;margin-bottom:20px}
+  .logos{gap:30px;padding-right:30px}
+  .logos img{height:38px;max-width:110px}
+  .logos img.sm{height:26px}
+  .clients{padding-block:34px}
+  .marquee{animation-duration:20s}
+}
+@media (max-width:820px){
+  .steps{padding-left:0}
+  .steps li{align-items:center;text-align:center}
+  .steps .dot{position:relative;left:auto;top:auto;margin:0 0 18px}
+  .steps li:not(:last-child)::after{left:50%;top:auto;bottom:-26px;height:26px;transform:translateX(-1px)}
+  .steps .step-card::before{top:-10px;left:50%;transform:translateX(-50%) rotate(45deg)}
+  .steps p{margin:0 auto}
+}
+
+/* Ajustes mobile 2 (16/11) */
+.dots{display:none}
+@media (max-width:760px){
+  .perks span{display:block;line-height:1.3;margin-top:2px}
+  .grid .dots{display:flex;position:absolute;right:8px;bottom:8px;gap:5px;padding:5px 7px;border-radius:20px;background:rgba(17,17,16,.6);backdrop-filter:blur(4px)}
+  .grid .dots i{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.55)}
+}
+@media (max-width:820px){
+  .steps{gap:18px;margin-top:28px}
+  .steps .dot{width:40px;height:40px;font-size:17px;margin:0 0 14px}
+  .steps li:not(:last-child)::after{bottom:-18px;height:18px}
+  .steps .step-card{padding:18px 16px 20px}
+  .steps .step-card::before{width:14px;height:14px;top:-7px}
+  .steps .when{font-size:11px;margin-bottom:6px}
+  .steps h3{font-size:17px;margin-bottom:6px}
+  .steps p{font-size:15px;line-height:1.4}
+}
+
+/* Agotados */
+.card.sold .ph img{filter:grayscale(1) brightness(.55)}
+.badge.sold-b{background:#3a3a38;color:#fff}
+.card.sold .off{background:#3a3a38}
+.card.sold .btn{background:#2a2a28;border-color:#2a2a28;color:#8d8a83;cursor:not-allowed}
+.card.sold .btn svg{display:none}
+.finish.out{opacity:.5;text-decoration:line-through}
+.finish.sw.out{cursor:not-allowed}
+.dots i.out{opacity:.3}
+</style>
+</head>
+<body>
+
+
+<main id="top">
+  <section class="hero" style="padding:0" aria-label="Black Sayos">
+    <div class="hero-copy">
+      <img class="hero-logo" src="img/sayos-logo.svg" alt="Sayos">
+      <div class="date-tag fx-beat">20 NOV - 15 DIC</div>
+      <h1 class="fx" data-text="Oportunidades por tiempo limitado">Oportunidades por tiempo limitado</h1>
+      <p class="lede">15% OFF o cuotas sin interés en productos seleccionados</p>
+      <a class="btn" href="#modelos">Ver modelos ↓</a>
+    </div>
+    <div class="hero-media">
+      <video data-src="video/hero.mp4" data-poster="video/hero-poster.jpg" autoplay muted loop playsinline preload="none" aria-label="Vitrinas Sayos con tortas y postres"></video>
+      <img class="hero-photo" src="img/hvrg150.jpg" alt="Heladera horizontal Sayos de acero inoxidable con tortas y budines">
+      <div class="ribbon" aria-hidden="true"><span>BLACK <img src="img/sayos-logo.svg" alt=""></span></div>
+    </div>
+  </section>
+
+  <div class="paybar" aria-label="Formas de pago: 15% OFF en 1 pago o anticipo más cuotas sin interés">
+    <div class="track">
+      <div class="grp"><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M8.5 8.5h.01"/><path d="M15.5 10.5l-5 5"/><circle cx="10.6" cy="11" r=".9"/><circle cx="15.2" cy="15.2" r=".9"/></svg>15% OFF en 1 pago</span><span class="sep"></span><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/><path d="M6.5 15h3"/><path d="M14 15h1.5M17 15h1.5"/></svg>Anticipo + cuotas sin interés</span><span class="sep"></span><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M8.5 8.5h.01"/><path d="M15.5 10.5l-5 5"/><circle cx="10.6" cy="11" r=".9"/><circle cx="15.2" cy="15.2" r=".9"/></svg>15% OFF en 1 pago</span><span class="sep"></span><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/><path d="M6.5 15h3"/><path d="M14 15h1.5M17 15h1.5"/></svg>Anticipo + cuotas sin interés</span><span class="sep"></span><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M8.5 8.5h.01"/><path d="M15.5 10.5l-5 5"/><circle cx="10.6" cy="11" r=".9"/><circle cx="15.2" cy="15.2" r=".9"/></svg>15% OFF en 1 pago</span><span class="sep"></span><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/><path d="M6.5 15h3"/><path d="M14 15h1.5M17 15h1.5"/></svg>Anticipo + cuotas sin interés</span><span class="sep"></span></div>
+      <div class="grp" aria-hidden="true"><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M8.5 8.5h.01"/><path d="M15.5 10.5l-5 5"/><circle cx="10.6" cy="11" r=".9"/><circle cx="15.2" cy="15.2" r=".9"/></svg>15% OFF en 1 pago</span><span class="sep"></span><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/><path d="M6.5 15h3"/><path d="M14 15h1.5M17 15h1.5"/></svg>Anticipo + cuotas sin interés</span><span class="sep"></span><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M8.5 8.5h.01"/><path d="M15.5 10.5l-5 5"/><circle cx="10.6" cy="11" r=".9"/><circle cx="15.2" cy="15.2" r=".9"/></svg>15% OFF en 1 pago</span><span class="sep"></span><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/><path d="M6.5 15h3"/><path d="M14 15h1.5M17 15h1.5"/></svg>Anticipo + cuotas sin interés</span><span class="sep"></span><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M8.5 8.5h.01"/><path d="M15.5 10.5l-5 5"/><circle cx="10.6" cy="11" r=".9"/><circle cx="15.2" cy="15.2" r=".9"/></svg>15% OFF en 1 pago</span><span class="sep"></span><span class="it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19"/><path d="M6.5 15h3"/><path d="M14 15h1.5M17 15h1.5"/></svg>Anticipo + cuotas sin interés</span><span class="sep"></span></div>
+    </div>
+  </div>
+
+  <div class="perks">
+    <ul class="wrap">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17.5" cy="17.5" r="1.8"/></svg><div><strong>Entrega inmediata</strong><span>Equipos fabricados y en stock</span></div></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><div><strong>Envío sin cargo</strong><span>En CABA y GBA</span></div></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l7 3v5c0 5-3.2 8.6-7 10-3.8-1.4-7-5-7-10V6z"/><path d="M8.8 12l2.2 2.2 4.2-4.4"/></svg><div><strong>Garantía de 12 meses</strong><span>Directa de fábrica</span></div></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20V8l8-5 8 5v12"/><path d="M9 20v-6h6v6"/></svg><div><strong>Fábrica desde 1975</strong><span class="nac">Producción nacional <svg class="flag" viewBox="0 0 30 20" role="img" aria-label="Bandera de Argentina"><rect width="30" height="20" fill="#74ACDF"/><rect y="6.67" width="30" height="6.67" fill="#fff"/><circle cx="15" cy="10" r="2.1" fill="#F6B40E"/></svg></span></div></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5"/><path d="M3 16.5l9 4.5 9-4.5"/></svg><div><strong>100% acero inoxidable</strong><span>Interior y exterior</span></div></li>
+    </ul>
+  </div>
+
+  <section id="modelos">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <h2 class="display">Modelos seleccionados</h2>
+        </div>
+        <div class="stock-tag" id="stock-total">Stock limitado</div>
+      </div>
+      <div class="filters" role="group" aria-label="Filtrar modelos">
+        <button type="button" data-f="todas" aria-pressed="true">Todas</button>
+        <button type="button" data-f="Vertical" aria-pressed="false">Verticales</button>
+        <button type="button" data-f="Horizontal" aria-pressed="false">Horizontales</button>
+        <button type="button" data-f="Mural" aria-pressed="false">Murales</button>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section class="why">
+    <div class="wrap">
+      <div class="sec-head" style="margin-bottom:0;justify-content:center;text-align:center">
+        <div>
+          <h2 class="display">Por qué una heladera Sayos</h2>
+        </div>
+      </div>
+      <div class="why-grid">
+        <article><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0 5 5L21 13l-8 8-3-3 8-8z" opacity="0"/><path d="M14.5 4.5a4.5 4.5 0 0 0-5.6 5.9L3.5 15.8a1.8 1.8 0 0 0 2.6 2.6l5.4-5.4a4.5 4.5 0 0 0 5.9-5.6l-2.7 2.7-2.4-.6-.6-2.4z"/></svg><h3>Se repara en cualquier lado</h3><p>Si algún día falla, la repara cualquier técnico de refrigeración, sin esperar repuestos de afuera.</p></article>
+        <article><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M4 9h16M4 15h16M12 3v18"/></svg><h3>Estructura que aguanta</h3><p>Cada estante de vidrio soporta ocho tortas de 2 kg sin flexionarse.</p></article>
+        <article><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8l3-3M8 12l6-6M10 16l6-6"/></svg><h3>Vidrio que no se empaña</h3><p>Doble vidrio hermético (DVH) con antiempañante y luz LED de alta luminosidad.</p></article>
+        <article><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11"/><path d="M9.5 3.5L12 6l2.5-2.5M9.5 20.5L12 18l2.5 2.5"/></svg><h3>Frío parejo y húmedo</h3><p>Frío envolvente húmedo con termostato digital: mantiene la misma temperatura y entre 55 y 65 % de humedad en todos los niveles. Las tortas no se resecan y duran más.</p></article>
+      </div>
+      <div class="incl">
+        <h3>Especificaciones de todos los modelos</h3>
+        <ul><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M4.5 6.5l15 11M19.5 6.5l-15 11"/><path d="M9.5 3.5L12 6l2.5-2.5M9.5 20.5L12 18l2.5 2.5"/></svg><div>4 a 6 °C<br><span>Pastelería</span></div></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></svg><div>16 a 22 °C<br><span>Bombones y chocolates</span></div></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v3M12 17v3M4 12h3M17 12h3"/><circle cx="12" cy="12" r="2"/></svg><div>Motor 1/2 HP<br><span>Unidad condensadora incorporada</span></div></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="11" rx="1.5"/><circle cx="7" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg><div>Con ruedas<br><span>Fácil de mover y limpiar</span></div></li></ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="clients" aria-label="Clientes de Sayos">
+    <div class="marquee">
+      <div class="logos">
+        <img src="clients/petoruti.png" alt="Pertutti">
+        <img src="clients/dosescudos.png" alt="Dos Escudos">
+        <img src="clients/europea.png" alt="La Nueva Europea">
+        <img src="clients/elise.png" alt="For Elise">
+        <img src="clients/caserito.png" alt="La Esquina del Caserito">
+        <img src="clients/barrio.png" alt="Le Blé">
+        <img class="sm" src="clients/marc.png" alt="Marchelo">
+        <img src="clients/vaca.png" alt="Vaca">
+        <img src="clients/desiree.png" alt="Desirée">
+      </div>
+      <div class="logos" aria-hidden="true">
+        <img src="clients/petoruti.png" alt="">
+        <img src="clients/dosescudos.png" alt="">
+        <img src="clients/europea.png" alt="">
+        <img src="clients/elise.png" alt="">
+        <img src="clients/caserito.png" alt="">
+        <img src="clients/barrio.png" alt="">
+        <img class="sm" src="clients/marc.png" alt="">
+        <img src="clients/vaca.png" alt="">
+        <img src="clients/desiree.png" alt="">
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <h2 class="display" style="font-size:clamp(34px,4.2vw,54px);text-align:center">Cómo reservar</h2>
+      <ol class="steps">
+        <li><span class="dot">1</span><div class="step-card"><span class="when">Hoy</span><h3>Elegís el modelo</h3><p>Tocá “Consultar por WhatsApp” en la heladera que te interesa y dejanos tus datos.</p></div></li>
+        <li><span class="dot">2</span><div class="step-card"><span class="when">Lun a vie, 9 a 17 h</span><h3>Hablás con ventas</h3><p>Te escribimos por WhatsApp con el precio Black Sayos y las formas de pago.</p></div></li>
+        <li><span class="dot">3</span><div class="step-card"><span class="when">Entrega inmediata</span><h3>La recibís en tu local</h3><p>Coordinamos la entrega e instalación sin cargo en CABA y GBA.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <div>
+        <h2 class="display">¿Qué equipo va mejor en tu local?</h2>
+        <p class="fit">Contanos qué vendés y cuánto espacio tenés. Te asesoramos sin compromiso.</p>
+      </div>
+      <a class="btn wa" href="#" data-wa="cierre"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3a.5.5 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3z"/></svg>Hablar con ventas</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="img/sayos-logo.svg" alt="Sayos">
+    <div>
+      <p><strong style="color:var(--ink)">Showroom:</strong> Av. Jujuy 823, CABA · lunes a viernes de 9 a 13:30</p>
+      <p><strong style="color:var(--ink)">WhatsApp:</strong> +54 9 11 2766 0405 · lunes a viernes de 9 a 17</p>
+    </div>
+    <p class="legal">Black Sayos: 15% de descuento en un pago o cuotas sin interés en productos seleccionados. Promoción válida del 20 de noviembre al 15 de diciembre de 2026 inclusive o hasta agotar stock de las unidades publicadas. Válida para entregas en CABA y GBA. Precios más IVA 10,5%. Las imágenes son ilustrativas; terminación y detalles según la unidad disponible. Sayos · Fábrica de heladeras comerciales desde 1975.</p>
+  </div>
+</footer>
+
+<a class="wa-float" href="#" data-wa="flotante" aria-label="Escribinos por WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3a.5.5 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3z"/></svg><span>WhatsApp</span></a>
+
+<dialog id="detail" class="detail-dlg" aria-label="Detalle del producto"><button type="button" class="x detail-x" aria-label="Cerrar">×</button><article class="card detail" id="detail-card"></article></dialog>
+
+<dialog id="dlg" aria-labelledby="dlg-title">
+  <form class="dlg" id="form" novalidate>
+    <div class="dlg-top">
+      <div>
+        <div class="eyebrow">Black Sayos</div>
+        <h2 id="dlg-title">Consultá por esta heladera</h2>
+        <div class="sub" id="dlg-model"></div>
+      </div>
+      <button type="button" class="x" id="dlg-close" aria-label="Cerrar">×</button>
+    </div>
+    <label>Tu nombre<input name="nombre" autocomplete="name" required></label>
+    <div class="row2">
+      <label>Rubro
+        <select name="rubro" required>
+          <option value="">Elegí</option>
+          <option>Panadería</option><option>Confitería</option><option>Fábrica de pastas</option>
+          <option>Bombonería</option><option>Cafetería</option><option>Otro</option>
+        </select>
+      </label>
+      <label>Nombre del local<input name="local" autocomplete="organization" required></label>
+    </div>
+    <label>Zona (barrio o localidad)<input name="localidad" placeholder="Ej.: Caballito, Morón" autocomplete="address-level2" required></label>
+    <p class="err" id="err" hidden>Completá todos los datos así te respondemos más rápido.</p>
+    <div class="preview" id="preview" hidden>
+      <div class="preview-top"><span>Tu mensaje</span><button type="button" id="copy-msg">Copiar</button></div>
+      <p id="preview-txt"></p>
+    </div>
+    <a class="btn wa" id="wa-go" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>Seguir por WhatsApp</a>
+    <small>Se abre WhatsApp con tu mensaje listo. Si no aparece escrito, tocá “Copiar” y pegalo en el chat. Respondemos de lunes a viernes de 9 a 17. Entregas solo en CABA y GBA.</small>
+  </form>
+</dialog>
+
+<script>
+/* ===== STOCK: editar acá =====
+   Fuente: planilla "STOCK BLACK SAYOS GADWICK" (16/11). Solo filas con unidades > 0.
+   img: foto principal. fotos (opcional): una foto por terminación; al tocar o pasar el mouse por el color, cambia la foto.
+   terminaciones: [nombre, unidades]. tags: lo propio de cada modelo (lo común a todas va en "Todas incluyen", debajo del catálogo). */
+/* ===== STOCK EN VIVO =====
+   La web lee la planilla de Google "Stock Black Sayos (web)" (compartida como
+   "Cualquier persona con el enlace: Lector"). Pegar acá el ID de la planilla
+   (lo que va entre /d/ y /edit en el link). Si queda vacío o la planilla no
+   responde, se usa el stock cargado abajo. */
+const SHEET_ID = "160mw4VKOZhLXiZoi6gOxmmPAXIxQ6Jw6k8DmarkHSXg";
+const SHEET_TAB = "Stock";
+const REFRESH_MS = 120000;
+const STOCK = [
+  {id:"V70", modelo:"HGV70", tipo:"Vertical", ancho:70, medidas:"70 × 70 × 170 cm", img:"img/hgv70.jpg", off:15,
+   terminaciones:[["Negro",1]],
+   tags:["Caños de acero inox","Frío envolvente húmedo"]},
+  {id:"V120", modelo:"HGV120", tipo:"Vertical", ancho:120, medidas:"120 × 70 × 170 cm", img:"img/hgv120.jpg", off:15,
+   terminaciones:[["Negro",1]],
+   tags:["Caños de acero inox","Frío envolvente húmedo"]},
+  {id:"H120", modelo:"HVRG120", tipo:"Horizontal", ancho:120, medidas:"120 × 70 × 130 cm", img:"img/hvrg120-dorado.jpg", off:15,
+   terminaciones:[["Dorado",1],["Blanco y dorado",1],["Acero esmerilado",1],["Negro",1]],
+   fotos:{"Dorado":"img/hvrg120-dorado.jpg","Blanco y dorado":"img/hvrg120-blanco.jpg","Acero esmerilado":"img/hvrg120-esmerilado.jpg","Negro":"img/hvrg120-negro.jpg"},
+   tags:["Vidrio recto","Caños de acero inox","Frío envolvente húmedo"]},
+  {id:"H150", modelo:"HVRG150", tipo:"Horizontal", ancho:150, medidas:"150 × 70 × 130 cm", img:"img/hvrg150.jpg", off:15,
+   terminaciones:[["Acero esmerilado",1]],
+   tags:["Vidrio recto","Caños de acero inox","Frío envolvente húmedo"]},
+  {id:"M120", modelo:"HMG120", tipo:"Mural", ancho:120, medidas:"120 cm de ancho", img:"img/hmg120.jpg", off:15,
+   terminaciones:[["Negro",1]],
+   tags:["Puertas corredizas","Rejillas cromadas","Apto bebidas"]},
+  {id:"M150", modelo:"HMG150", tipo:"Mural", ancho:150, medidas:"150 cm de ancho", img:"img/hmg150.jpg", off:15,
+   terminaciones:[["Acero esmerilado",1]],
+   tags:["Puertas corredizas","Estantes de vidrio 8 mm","Frío envolvente húmedo"]},
+];
+const SWATCH = {
+  "Negro":"#151515",
+  "Acero esmerilado":"linear-gradient(135deg,#d9d9d9,#8c8c8c)",
+  "Dorado":"linear-gradient(135deg,#e2cf8f,#a88d47)",
+  "Blanco y dorado":"radial-gradient(circle,#f2f0ea 55%,#c9b77f 58%)"
+};
+const WA = "5491127660405";
+const START = new Date("2026-11-20T00:00:00-03:00");
+const END   = new Date("2026-12-15T23:59:59-03:00");
+
+window.dataLayer = window.dataLayer || [];
+const track = (event, params={}) => dataLayer.push({event, ...params});
+const fmt = n => "$" + n.toLocaleString("es-AR");
+const waUrl = text => "https://api.whatsapp.com/send?phone=" + WA + "&text=" + encodeURIComponent(text);
+const nombre = m => "Heladera " + m.tipo.toLowerCase() + " " + m.ancho + " cm";
+
+/* Render catálogo */
+function cardHTML(m, badge, fin, price){
+  return (
+      '<div class="ph'+(m.img?'':' empty')+'">'+(m.img?'<img src="'+m.img+'" alt="'+nombre(m)+'" loading="lazy">':'')+badge+
+        (m.fotos?'<span class="dots" aria-label="'+Object.keys(m.fotos).length+' colores disponibles">'+Object.keys(m.fotos).map(c=>'<i style="background:'+SWATCH[c]+'"></i>').join('')+'</span>':'')+'</div>'+
+      '<div class="body">'+
+        '<div class="card-title"><h3><small>'+m.tipo+'</small>'+m.ancho+' cm de ancho</h3>'+(m.off?'<span class="off">'+m.off+'% OFF</span>':'')+'</div>'+
+        '<p class="meta">'+m.modelo+' · '+m.medidas+'</p>'+
+        '<div class="tags">'+m.tags.map(t=>'<span>'+t+'</span>').join('')+'</div>'+
+        fin + price +
+        '<span class="more">Ver detalle +</span>'+
+        '<button class="btn" type="button" data-reserve="'+m.id+'"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3a.5.5 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.5-.3z"/></svg>Consultar por WhatsApp</button>'+
+      '</div>'
+  );
+}
+
+const grid = document.getElementById("grid");
+const units = m => m.terminaciones.reduce((a,t)=>a+t[1],0);
+const SEL = {};   // color elegido por modelo (se conserva al refrescar stock)
+let FILTER = "todas";
+function fotoDe(m){
+  if(!m.fotos) return m.img;
+  const sel = SEL[m.id] && m.terminaciones.find(t=>t[0]===SEL[m.id] && t[1]>0);
+  const first = m.terminaciones.find(t=>t[1]>0 && m.fotos[t[0]]);
+  const c = sel ? sel[0] : first ? first[0] : m.terminaciones[0][0];
+  SEL[m.id] = c; return m.fotos[c] || m.img;
+}
+function render(filter){
+  if(filter) FILTER = filter;
+  grid.innerHTML = "";
+  const list = STOCK.filter(m => FILTER==="todas" || m.tipo===FILTER)
+    .map((m,i)=>[m,i]).sort((x,y)=>((units(x[0])===0)-(units(y[0])===0)) || x[1]-y[1]).map(x=>x[0]);
+  list.forEach(m => {
+    const n = units(m), sold = n===0;
+    const img = fotoDe(m);
+    const badge = sold ? '<span class="badge sold-b">Agotado</span>'
+                : n===1 ? '<span class="badge last">Última unidad</span>' : '<span class="badge">Quedan ' + n + '</span>';
+    const fin = '<div class="finishes">' + m.terminaciones.map(t=>{
+        const out = t[1]===0;
+        const lbl='<i style="background:'+SWATCH[t[0]]+'"></i>'+t[0]+(out?' · Agotado':'');
+        return m.fotos && m.fotos[t[0]] && !sold
+          ? '<button type="button" class="finish sw'+(out?' out':'')+'" data-m="'+m.id+'" data-c="'+t[0]+'"'+(out?' disabled':'')+' aria-pressed="'+(SEL[m.id]===t[0])+'">'+lbl+'</button>'
+          : '<span class="finish'+(out?' out':'')+'">'+lbl+'</span>';
+      }).join("") + '</div>';
+    const price = m.precioBlack
+      ? '<div class="price">'+(m.precio?'<s>'+fmt(m.precio)+'</s>':'')+'<strong>'+fmt(m.precioBlack)+' + IVA</strong></div>'
+      : '';
+    const el = document.createElement("article");
+    el.className = "card" + (sold ? " sold" : "");
+    el.dataset.id = m.id;
+    el.innerHTML = cardHTML(Object.assign({}, m, {img}), badge, fin, price);
+    if(sold){ const b=el.querySelector("[data-reserve]"); b.disabled=true; b.lastChild.textContent="Agotado"; }
+    if(m.fotos){ el.querySelectorAll(".dots i").forEach((d,i)=>{ if(m.terminaciones.find(t=>t[0]===Object.keys(m.fotos)[i])?.[1]===0) d.classList.add("out"); }); }
+    grid.appendChild(el);
+  });
+  const total = STOCK.reduce((a,m)=>a+units(m),0);
+  document.getElementById("stock-total").textContent = total ? total + (total===1?" unidad en stock":" unidades en stock") : "Stock agotado";
+}
+render("todas");
+/* Cambiar foto según la terminación (clic, toque o mouse encima) */
+function pickFinish(btn, keep){
+  const m = STOCK.find(x=>x.id===btn.dataset.m); if(!m||!m.fotos) return;
+  const card = btn.closest(".card"), img = card.querySelector(".ph img");
+  const src = m.fotos[btn.dataset.c];
+  if(img && src && img.getAttribute("src")!==src){ img.style.opacity=.35; img.onload=()=>{img.style.opacity=1}; img.src=src; img.alt=nombre(m)+" "+btn.dataset.c.toLowerCase(); }
+  if(keep){
+    card.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed", b===btn));
+    card.dataset.sel = btn.dataset.c;
+    SEL[m.id] = btn.dataset.c;
+    track("terminacion", {modelo:m.id, color:btn.dataset.c});
+  }
+}
+document.addEventListener("click", e => { const b=e.target.closest(".sw"); if(b && !b.disabled) pickFinish(b,true); });
+document.addEventListener("mouseover", e => { const b=e.target.closest(".sw"); if(b && !b.disabled) pickFinish(b,false); });
+document.addEventListener("mouseout", e => {
+  const b=e.target.closest(".sw"); if(!b || b.contains(e.relatedTarget)) return;
+  const card=b.closest(".card"), sel=card.querySelector('.sw[aria-pressed="true"]');
+  if(sel && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".sw"))) pickFinish(sel,false);
+});
+STOCK.forEach(m=>{ if(m.fotos) Object.values(m.fotos).forEach(src=>{ const i=new Image(); i.src=src; }); });
+
+
+
+/* Leer stock de la planilla de Google */
+function parseCSV(t){
+  const rows=[]; let row=[], f="", q=false;
+  for(let i=0;i<t.length;i++){ const c=t[i];
+    if(q){ if(c==='"'){ if(t[i+1]==='"'){f+='"';i++;} else q=false; } else f+=c; }
+    else if(c==='"') q=true; else if(c===','){row.push(f);f="";} else if(c==='\n'||c==='\r'){ if(c==='\r'&&t[i+1]==='\n') i++; row.push(f); rows.push(row); row=[]; f=""; } else f+=c; }
+  if(f||row.length){row.push(f);rows.push(row);} return rows;
+}
+const norm = x => String(x||"").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function cantidad(v){ const s=norm(v); if(!s || s.startsWith("agot")) return 0; const n=parseInt(s.replace(/\D+/g,""),10); return isNaN(n)?0:Math.max(0,n); }
+async function syncStock(){
+  if(!SHEET_ID) return;
+  try{
+    const url="https://docs.google.com/spreadsheets/d/"+SHEET_ID+"/gviz/tq?tqx=out:csv&sheet="+encodeURIComponent(SHEET_TAB)+"&_="+Date.now();
+    const r=await fetch(url,{cache:"no-store"}); if(!r.ok) throw new Error(r.status);
+    const rows=parseCSV(await r.text()); if(rows.length<2) throw new Error("vacía");
+    const h=rows[0].map(norm), iM=h.indexOf("modelo"), iC=h.indexOf("color"), iU=h.indexOf("unidades");
+    if(iM<0||iC<0||iU<0) throw new Error("columnas");
+    let cambios=0;
+    rows.slice(1).forEach(r=>{
+      const m=STOCK.find(x=>norm(x.modelo)===norm(r[iM])); if(!m) return;
+      const t=m.terminaciones.find(x=>norm(x[0])===norm(r[iC])); if(!t) return;
+      const n=cantidad(r[iU]); if(t[1]!==n){ t[1]=n; cambios++; }
+    });
+    if(cambios) render();
+  }catch(err){ console.warn("Stock: uso el cargado en la página", err); }
+}
+syncStock(); setInterval(syncStock, REFRESH_MS);
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) syncStock(); });
+document.querySelectorAll(".filters button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".filters button").forEach(x=>x.setAttribute("aria-pressed", x===b));
+  render(b.dataset.f);
+  track("filtro_modelos", {filtro:b.dataset.f});
+}));
+
+
+/* Celular: tocar un producto abre el detalle */
+const detail = document.getElementById("detail"), detailCard = document.getElementById("detail-card");
+const esCel = () => matchMedia("(max-width:760px)").matches;
+grid.addEventListener("click", e => {
+  if(!esCel() || e.target.closest(".sw,[data-reserve]")) return;
+  const card = e.target.closest(".card"); if(!card) return;
+  detailCard.innerHTML = card.innerHTML;
+  const img = detailCard.querySelector(".ph img"); if(img) img.removeAttribute("loading");
+  track("ver_detalle", {modelo:card.dataset.id});
+  detail.showModal ? detail.showModal() : detail.setAttribute("open","");
+});
+detail.querySelector(".detail-x").onclick = () => detail.close();
+detail.addEventListener("click", e => { if(e.target===detail) detail.close(); });
+/* Portada: el video se carga solo en compu; en celular va la foto */
+(function(){
+  const v=document.querySelector(".hero-media video");
+  const load=()=>{ if(!esCel() && matchMedia("(min-width:861px)").matches && !v.src){ v.poster=v.dataset.poster; v.src=v.dataset.src; v.play&&v.play().catch(()=>{}); } };
+  load(); addEventListener("resize", load);
+})();
+/* Reserva → WhatsApp */
+const dlg = document.getElementById("dlg"), form = document.getElementById("form");
+let current = null;
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-reserve]"); if(!b) return;
+  if(b.closest("#detail")) detail.close();
+  current = STOCK.find(m=>m.id===b.dataset.reserve);
+  const sel = b.closest(".card").querySelector('.sw[aria-pressed="true"]');
+  current.color = sel ? sel.dataset.c : null;
+  document.getElementById("dlg-model").textContent = nombre(current) + (current.color ? " · " + current.color : "");
+  document.getElementById("err").hidden = true;
+  track("cta_cotizar", {modelo:current.id});
+  actualizar();
+  dlg.showModal ? dlg.showModal() : dlg.setAttribute("open","");
+});
+document.getElementById("dlg-close").onclick = () => dlg.close();
+dlg.addEventListener("click", e => { if(e.target===dlg) dlg.close(); });
+const go = document.getElementById("wa-go");
+function datos(){ const d=Object.fromEntries(new FormData(form)); for(const k in d) d[k]=String(d[k]).trim(); return d; }
+function completo(d){ return d.nombre && d.rubro && d.local && d.localidad; }
+function mensaje(d){
+  const prod = nombre(current).toLowerCase() + " (" + current.modelo + (current.color ? ", " + current.color.toLowerCase() : "") + ")";
+  return "Hola, soy " + d.nombre + " de " + d.local + " (" + d.rubro.toLowerCase() + ", zona " + d.localidad + "). " +
+         "Vi la promo Black Sayos y me interesa la " + prod + ".";
+}
+function actualizar(){
+  const d=datos(), ok=completo(d), box=document.getElementById("preview");
+  go.href = ok ? waUrl(mensaje(d)) : "#";
+  if(ok){ document.getElementById("err").hidden=true; box.hidden=false; document.getElementById("preview-txt").textContent=mensaje(d); }
+  else box.hidden=true;
+}
+form.addEventListener("input", actualizar); form.addEventListener("change", actualizar);
+go.addEventListener("click", e => {
+  const d=datos();
+  if(!completo(d)){ e.preventDefault(); document.getElementById("err").hidden=false; const f=form.querySelector("input:invalid,select:invalid")||[...form.elements].find(x=>x.name&&!String(x.value).trim()); f&&f.focus(); return; }
+  go.href = waUrl(mensaje(d));
+  track("generate_lead", {modelo:current.id, rubro:d.rubro});
+  track("whatsapp_click", {ubicacion:"reserva", modelo:current.id});
+  setTimeout(()=>{ dlg.close(); }, 1500);
+});
+form.addEventListener("submit", e => { e.preventDefault(); go.click(); });
+document.getElementById("copy-msg").addEventListener("click", async e => {
+  const t=document.getElementById("preview-txt").textContent, b=e.currentTarget;
+  try{ await navigator.clipboard.writeText(t); b.textContent="¡Copiado!"; }
+  catch(_){ const r=document.createRange(); r.selectNodeContents(document.getElementById("preview-txt")); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r); b.textContent="Seleccionado"; }
+  setTimeout(()=>b.textContent="Copiar",2000);
+});
+document.querySelectorAll("[data-wa]").forEach(a => {
+  a.href = waUrl("Hola, vi la promo Black Sayos y quiero consultar por las heladeras en stock.");
+  a.target = "_blank"; a.rel = "noopener";
+  a.addEventListener("click", () => track("whatsapp_click", {ubicacion:a.dataset.wa}));
+});
+
+
+
+/* WhatsApp flotante: se oculta desde la cinta de clientes (abajo está el botón "Hablar con ventas") */
+(function(){
+  const fab=document.querySelector(".wa-float"), mark=document.querySelector(".clients");
+  if(!fab||!mark) return;
+  const upd=()=>fab.classList.toggle("off", mark.getBoundingClientRect().top < window.innerHeight*0.85);
+  addEventListener("scroll",upd,{passive:true}); addEventListener("resize",upd); upd();
+})();
+
+/* Cierre: la bajada ocupa el mismo ancho que la pregunta */
+(function(){
+  const p=document.querySelector(".final .fit"), h=document.querySelector(".final h2");
+  if(!p||!h) return;
+  const fit=()=>{
+    p.style.fontSize=""; p.style.whiteSpace="";
+    if(innerWidth<700) return;
+    p.style.whiteSpace="nowrap"; p.style.maxWidth="none";
+    const range=document.createRange(); range.selectNodeContents(h);
+    const hw=range.getBoundingClientRect().width;
+    const r2=document.createRange(); r2.selectNodeContents(p);
+    const pw=r2.getBoundingClientRect().width;
+    const fs=parseFloat(getComputedStyle(p).fontSize);
+    p.style.fontSize=Math.min(fs*hw/pw, 30)+"px";
+  };
+  addEventListener("resize",fit); (document.fonts?document.fonts.ready:Promise.resolve()).then(fit); fit();
+})();
+/* Portada: el título se achica si la palabra más larga no entra en el panel */
+(function(){
+  const h=document.querySelector(".hero h1"), box=document.querySelector(".hero-copy");
+  if(!h||!box) return;
+  const fit=()=>{
+    h.style.fontSize="";
+    const cs=getComputedStyle(box), avail=box.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+    let fs=parseFloat(getComputedStyle(h).fontSize), r=document.createRange(), i=0;
+    r.selectNodeContents(h);
+    while(r.getBoundingClientRect().width>avail+1 && i++<40){ fs*=0.96; h.style.fontSize=fs+"px"; }
+  };
+  addEventListener("resize",fit); (document.fonts?document.fonts.ready:Promise.resolve()).then(fit); fit();
+})();
+</script>
+<script src="https://sayos-crm.onrender.com/landing/sayos-crm.js" defer></script>
+</body>
+</html>
