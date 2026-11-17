@@ -7,6 +7,7 @@ por número de teléfono usando SQLite (local) o PostgreSQL (producción en Rail
 """
 
 import os
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 import json
 from datetime import datetime
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
@@ -28,7 +29,20 @@ elif DATABASE_URL.startswith("postgresql://"):
 elif DATABASE_URL.startswith("postgresql+postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql+postgres://", "postgresql+asyncpg://", 1)
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+# Los proveedores cloud (Neon, Supabase, Railway) agregan parámetros pensados
+# para el driver psycopg (sslmode, channel_binding, options). asyncpg los
+# rechaza, así que los sacamos de la URL y pedimos TLS por la vía que sí entiende.
+_connect_args: dict = {}
+if DATABASE_URL.startswith("postgresql+asyncpg://"):
+    _partes = urlsplit(DATABASE_URL)
+    _query = [(k, v) for k, v in parse_qsl(_partes.query, keep_blank_values=True)]
+    _sslmode = next((v for k, v in _query if k == "sslmode"), None)
+    _limpia = [(k, v) for k, v in _query if k not in {"sslmode", "channel_binding", "options"}]
+    DATABASE_URL = urlunsplit(_partes._replace(query=urlencode(_limpia)))
+    if _sslmode is None or _sslmode not in {"disable", "allow"}:
+        _connect_args["ssl"] = True
+
+engine = create_async_engine(DATABASE_URL, echo=False, connect_args=_connect_args)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
