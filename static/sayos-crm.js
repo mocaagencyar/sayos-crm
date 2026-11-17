@@ -48,8 +48,12 @@
 
   // Guardamos el modelo de la tarjeta en la que se hizo clic
   document.addEventListener("click", function (e) {
-    var b = e.target && e.target.closest && e.target.closest("[data-reserve]");
-    if (b) ultimoModelo = b.getAttribute("data-reserve") || "";
+    if (!e.target || !e.target.closest) return;
+    var b = e.target.closest("[data-reserve]");
+    if (b) { ultimoModelo = b.getAttribute("data-reserve") || ""; return; }
+    // Los accesos sueltos (flotante, cierre) abren una consulta general:
+    // sin esto el lead quedaría etiquetado con el último modelo mirado.
+    if (e.target.closest("[data-wa]")) ultimoModelo = "";
   }, true);
 
   // Campo trampa: lo completan los bots, las personas no lo ven

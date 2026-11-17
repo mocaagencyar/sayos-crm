@@ -763,6 +763,7 @@ document.addEventListener("click", e => {
   current = STOCK.find(m=>m.id===b.dataset.reserve);
   const sel = b.closest(".card").querySelector('.sw[aria-pressed="true"]');
   current.color = sel ? sel.dataset.c : null;
+  document.getElementById("dlg-title").textContent = "Consultá por esta heladera";
   document.getElementById("dlg-model").textContent = nombre(current) + (current.color ? " · " + current.color : "");
   document.getElementById("err").hidden = true;
   track("cta_cotizar", {modelo:current.id});
@@ -775,6 +776,10 @@ const go = document.getElementById("wa-go");
 function datos(){ const d=Object.fromEntries(new FormData(form)); for(const k in d) d[k]=String(d[k]).trim(); return d; }
 function completo(d){ return d.nombre && d.rubro && d.local && d.localidad; }
 function mensaje(d){
+  if(current && current.general){
+    return "Hola, soy " + d.nombre + " de " + d.local + " (" + d.rubro.toLowerCase() + ", zona " + d.localidad + "). " +
+           "Vi la promo Black Sayos y quiero consultar por las heladeras en stock.";
+  }
   const prod = nombre(current).toLowerCase() + " (" + current.modelo + (current.color ? ", " + current.color.toLowerCase() : "") + ")";
   return "Hola, soy " + d.nombre + " de " + d.local + " (" + d.rubro.toLowerCase() + ", zona " + d.localidad + "). " +
          "Vi la promo Black Sayos y me interesa la " + prod + ".";
@@ -801,10 +806,20 @@ document.getElementById("copy-msg").addEventListener("click", async e => {
   catch(_){ const r=document.createRange(); r.selectNodeContents(document.getElementById("preview-txt")); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r); b.textContent="Seleccionado"; }
   setTimeout(()=>b.textContent="Copiar",2000);
 });
+/* Los accesos sueltos a WhatsApp abren la consulta: así toda consulta queda registrada */
+const GENERAL = { id:"GENERAL", general:true, color:null };
+function abrirConsultaGeneral(origen){
+  current = GENERAL;
+  document.getElementById("dlg-title").textContent = "Contanos qué estás buscando";
+  document.getElementById("dlg-model").textContent = "Consulta general";
+  document.getElementById("err").hidden = true;
+  track("cta_cotizar", {modelo:"general", ubicacion:origen});
+  actualizar();
+  dlg.showModal ? dlg.showModal() : dlg.setAttribute("open","");
+}
 document.querySelectorAll("[data-wa]").forEach(a => {
-  a.href = waUrl("Hola, vi la promo Black Sayos y quiero consultar por las heladeras en stock.");
-  a.target = "_blank"; a.rel = "noopener";
-  a.addEventListener("click", () => track("whatsapp_click", {ubicacion:a.dataset.wa}));
+  a.href = "#"; a.removeAttribute("target"); a.removeAttribute("rel");
+  a.addEventListener("click", e => { e.preventDefault(); abrirConsultaGeneral(a.dataset.wa); });
 });
 
 
